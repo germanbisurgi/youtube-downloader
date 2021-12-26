@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const logs = document.querySelector('#logs')
   const clear = document.querySelector('#clear')
   const abort = document.querySelector('#abort')
+  const explore = document.querySelector('#explore')
   abort.disabled = true
   const submit = document.querySelector('#submit')
   const editorContainer = document.querySelector('#editor-container')
@@ -17,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
     schema: {
       "required": true,
       "type": "object",
-      "title": "Configurator",
+      "title": "Youtube-Downloader",
       "properties": {
         "command": {
           "required": true,
@@ -28,34 +29,22 @@ window.addEventListener('DOMContentLoaded', () => {
             "yt-dlp"
           ],
           "default": "yt-dlp",
+          "options": {
+            "hidden": true
+          }
         },
         "url": {
           "required": true,
           "type": "string",
-          "title": "url",
+          "title": "URL",
           "default": "https://www.youtube.com/watch?v=lVdIGHZ-I28&list=PL7B04A852ACF0F7CE"
         },
-        "flags": {
+        "extractAudio": {
           "required": true,
-          "type": "array",
-          "title": "Flags",
-          "uniqueItems": true,
-          "default": [
-            "--ignore-errors"
-          ],
-          "items": {
-            "type": "string",
-              "enum": [
-                "--ignore-errors",
-                "--extract-audio"
-              ],
-              "options": {
-                "enum_titles": [
-                  "--ignore-errors",
-                  "--extract-audio"
-                ]
-            }
-          }
+          "type": "boolean",
+          "title": "Audio Only",
+          "format": "checkbox",
+          "default": false
         }
       }
     }
@@ -83,6 +72,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   abort.addEventListener('click', () => {
     ipcRenderer.send('abort')
+  })
+
+  explore.addEventListener('click', () => {
+    ipcRenderer.send('explore')
   })
 
   clear.addEventListener('click', () => {

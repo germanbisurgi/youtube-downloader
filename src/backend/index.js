@@ -1,66 +1,69 @@
 const commandante = require('./commandante')
-const { app, BrowserWindow, ipcMain, dialog} = require('electron')
+const { app, BrowserWindow, ipcMain, shell} = require('electron')
 const path = require('path')
-require('electron-reloader')(module)
+const fs = require('fs');
+//require('electron-reloader')(module)
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let win
+const outputDir = path.join(app.getPath('home'), 'youtube-downloader')
+
+
+const createOutputFolder = () => {
+  if (!fs.existsSync(outputDir)){
+    fs.mkdirSync(outputDir);
+  }
+}
 
 const createWindow = () => {
   win = new BrowserWindow({
     height: 900,
     width: 600,
+    icon: path.join(__dirname, '../assets/icons/png/icon.png'),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
-      // preload: path.join(__dirname, 'renderer.js')
+      contextIsolation: false
     }
   })
-  // win.webContents.openDevTools()
   win.loadFile(path.join(__dirname, '..', 'frontend', 'index.html'))
 }
 
 app.whenReady().then(() => {
   createWindow()
+  createOutputFolder()
+})
+
+ipcMain.on('explore', () => {
+  createOutputFolder()
+  shell.openPath(outputDir)
 })
 
 ipcMain.on('abort', () => {
   commandante.kill()
 })
 
-ipcMain.on('change', () => {
-  const command = commandante.getCommand()
-  win.webContents.send('command', command)
-})
-
-ipcMain.on('submit', (event, payload) => {
-  console.log('submit', payload)
+ipcMain.on('submit', (event, config) => {
+  console.log('submit', config)
   
-  let optionsWithValues = []
-  for (let key in payload.options) {
-    const stringOption = key + ' ' + payload.options[key]
-    optionsWithValues.push(stringOption)
-  }
-
-  let command = payload.command
-
   const args = [
-    ...payload.flags,
-    ...optionsWithValues,
-    '-o %(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s',
-    payload.url
+    config.url
   ]
 
-  const options = {
-    // cwd: path.join(__dirname, 'output'),
-    cwd: app.getPath('videos')
+  if (config.url.includes('&list=')) {
+    args.unshift('-o %(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s')
   }
 
-  let commandString = command + ' ' + args.join(' ')
-  console.log(commandString)
-  win.webContents.send('command', commandString)
+  if (config.extractAudio) {
+    args.unshift('--extract-audio')
+  }
 
-  commandante.command(payload.command, args, options)
+  const options = {
+    cwd: outputDir
+  }
+
+  win.webContents.send('command', config.command + ' ' + args.join(' '))
+
+  commandante.command(config.command, args, options)
 })
 
 commandante.onLogs = (log) => {

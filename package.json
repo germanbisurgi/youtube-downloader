@@ -1,12 +1,21 @@
 {
-  "name": "electron-app",
+  "name": "youtube-downloader",
+  "description": "Download video and audio from youtube",
+  "author": "German Bisurgi <gebisurgi@protonmail.com>",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/backend/index.js",
   "repository": "git@github.com:germanbisurgi/electron-app.git",
   "license": "MIT",
   "scripts": {
     "electron": "electron ./src/backend/index.js",
-    "build": "electron-builder build"
+    "build": "electron-builder build "
+  },
+  "build": {
+    "appId": "com.youtube-downloader",
+    "linux": {
+      "category": "Utility",
+      "target": ["deb"]
+    }
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.6.1",
