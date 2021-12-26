@@ -5,19 +5,19 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"-->
-    <link rel="stylesheet" href="./main.css">
-    <title>Hello World!</title>
+    <link rel="stylesheet" href="./css/index.css">
+    <title>Youtube Downloader</title>
   </head>
   <body>
     <div class="container-fluid">
       <div id="editor-container"></div>
-      <button id="submit">submit</button>
-      <button id="clear">clear</button>
-      <button id="abort">abort</button>
+      <button id="submit" class="btn">submit</button>
+      <button id="clear" class="btn">clear</button>
+      <button id="abort" class="btn">abort</button>
       <textarea id="command"></textarea>
       <textarea id="logs"></textarea>
     </div>
-    <script src="jsoneditor.min.js"></script>
-    <script src="client.js"></script>
+    <script src="./js/jsoneditor.min.js"></script>
+    <script src="./js/client.js"></script>
   </body>
 </html>

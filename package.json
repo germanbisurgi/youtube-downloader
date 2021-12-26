@@ -5,7 +5,7 @@
   "repository": "git@github.com:germanbisurgi/electron-app.git",
   "license": "MIT",
   "scripts": {
-    "electron": "electron ./index.js",
+    "electron": "electron ./src/backend/index.js",
     "build": "electron-builder build"
   },
   "dependencies": {
