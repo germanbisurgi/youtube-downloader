@@ -1,0 +1,21 @@
+{
+  "name": "electron-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:germanbisurgi/electron-app.git",
+  "license": "MIT",
+  "scripts": {
+    "electron": "electron ./index.js",
+    "build": "electron-builder build"
+  },
+  "dependencies": {
+    "@json-editor/json-editor": "^2.6.1",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "electron": "^16.0.5",
+    "electron-builder": "^22.14.5",
+    "electron-installer-debian": "^3.1.0",
+    "electron-reloader": "^1.2.1"
+  }
+}
