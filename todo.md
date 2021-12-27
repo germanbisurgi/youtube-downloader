@@ -1,1 +1,4 @@
-- preload for security
+- styling
+- icons
+- windows build
+- mac build 

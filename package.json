@@ -8,13 +8,22 @@
   "license": "MIT",
   "scripts": {
     "electron": "electron ./src/backend/index.js",
-    "build": "electron-builder build "
+    "build-all": "electron-builder build -mwl",
+    "build-linux": "electron-builder build -l",
+    "build-mac": "electron-builder build -m",
+    "build-win": "electron-builder build -w"
   },
   "build": {
     "appId": "com.youtube-downloader",
     "linux": {
       "category": "Utility",
       "target": ["deb"]
+    },
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "target": "portable"
     }
   },
   "dependencies": {
