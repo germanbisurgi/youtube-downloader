@@ -21,8 +21,10 @@ const createWindow = () => {
     width: 600,
     icon: path.join(__dirname, '../assets/icons/png/icon.png'),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      preload: path.join(__dirname, "preload.js")
     }
   })
   win.loadFile(path.join(__dirname, '..', 'frontend', 'index.html'))

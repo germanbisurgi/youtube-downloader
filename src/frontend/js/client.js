@@ -1,7 +1,5 @@
-const electron = require('electron')
-const { ipcRenderer } = electron
-
 window.addEventListener('DOMContentLoaded', () => {
+  console.log(window.api)
   const logs = document.querySelector('#logs')
   const clear = document.querySelector('#clear')
   const abort = document.querySelector('#abort')
@@ -50,16 +48,16 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  ipcRenderer.on('command', (event, message) => {
+  window.api.on('command', (event, message) => {
     command.value = message
   })
 
-  ipcRenderer.on('logs', (event, message) => {
+  window.api.on('logs', (event, message) => {
     logs.value += message
     logs.scrollTop = logs.scrollHeight;
   })
 
-  ipcRenderer.on('exit', () => {
+  window.api.on('exit', () => {
     submit.disabled = false
     abort.disabled = true
   })
@@ -67,15 +65,15 @@ window.addEventListener('DOMContentLoaded', () => {
   submit.addEventListener('click', () => {
     submit.disabled = true
     abort.disabled = false
-    ipcRenderer.send('submit', editor.getValue())
+    window.api.send('submit', editor.getValue())
   })
 
   abort.addEventListener('click', () => {
-    ipcRenderer.send('abort')
+    window.api.send('abort')
   })
 
   explore.addEventListener('click', () => {
-    ipcRenderer.send('explore')
+    window.api.send('explore')
   })
 
   clear.addEventListener('click', () => {
