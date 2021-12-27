@@ -15,14 +15,25 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
+    "productName": "youtube-downloader",
     "appId": "com.youtube-downloader",
+    "deb": {
+      "depends": ["gconf2", "gconf-service", "libnotify4", "libappindicator1", "libxtst6", "libnss3", "yt-dlp"]
+    },
     "linux": {
+      "icon": "build/icons",
       "category": "Utility",
-      "target": ["deb"]
+      "target": [
+        "deb"
+      ]
     },
     "mac": {
-      "category": "your.app.category.type"
-    },
+			"target": [
+				"dmg"
+			],
+			"icon": "build/icon.png",
+			"category": "public.app-category.utility"
+		},
     "win": {
       "icon": "build/icons/icon.ico",
       "target": "nsis"
