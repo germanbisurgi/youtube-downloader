@@ -4,7 +4,7 @@ A graphical interface for `yt-dpl` build with Electron
 
 ## Dependency
 
-To install `yt-dpl` follow the install instructions of the yt-dlp repo [here]([here](https://github.com/yt-dlp/yt-dlp#installation))
+To install `yt-dpl` follow the install instructions of the yt-dlp repo [here](https://github.com/yt-dlp/yt-dlp#installation)
 
 ## Features
 
