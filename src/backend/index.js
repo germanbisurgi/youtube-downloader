@@ -1,5 +1,5 @@
 const commandante = require('./commandante')
-const { app, BrowserWindow, ipcMain, shell} = require('electron')
+const { app, BrowserWindow, ipcMain, shell, screen} = require('electron')
 const path = require('path')
 const fs = require('fs');
 //require('electron-reloader')(module)
@@ -16,9 +16,14 @@ const createOutputFolder = () => {
 }
 
 const createWindow = () => {
+  let display = screen.getPrimaryDisplay();
+  let width = display.bounds.width;
+  let height = display.bounds.height;
   win = new BrowserWindow({
-    height: 900,
+    height: height,
     width: 600,
+    x: width - 600,
+    y: 0,
     icon: path.join(__dirname, '../assets/icons/png/icon.png'),
     webPreferences: {
       nodeIntegration: false,

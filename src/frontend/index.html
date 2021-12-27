@@ -2,9 +2,6 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"-->
     <link rel="stylesheet" href="./css/index.css">
     <title>Youtube Downloader</title>
   </head>
@@ -12,12 +9,17 @@
     <div class="container-fluid">
       <div id="editor-container"></div>
       <hr>
-      <button id="submit" class="btn">submit</button>
-      <button id="clear" class="btn">clear</button>
-      <button id="abort" class="btn">abort</button>
-      <button id="explore" class="btn">explore</button>
-      <hr>
-      <textarea id="command"></textarea>
+      <div class="btn-group">
+        <button id="submit" class="btn">
+          <i class="fas fa-play"></i>
+        </button>
+        <button id="abort" class="btn">
+          <i class="fas fa-stop-circle"></i>
+        </button>
+        <button id="explore" class="btn">
+          <i class="fas fa-folder-open"></i>
+        </button>
+      </div>
       <hr>
       <textarea id="logs"></textarea>
     </div>

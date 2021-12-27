@@ -1,7 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
-  console.log(window.api)
   const logs = document.querySelector('#logs')
-  const clear = document.querySelector('#clear')
   const abort = document.querySelector('#abort')
   const explore = document.querySelector('#explore')
   abort.disabled = true
@@ -12,11 +10,12 @@ window.addEventListener('DOMContentLoaded', () => {
     disable_properties: true,
     disable_collapse: true,
     show_opt_in: true,
+    show_errors: 'always',
     theme: 'bootstrap4',
     schema: {
       "required": true,
       "type": "object",
-      "title": "Youtube-Downloader",
+      "title": "Youtube Downloader",
       "properties": {
         "command": {
           "required": true,
@@ -35,7 +34,7 @@ window.addEventListener('DOMContentLoaded', () => {
           "required": true,
           "type": "string",
           "title": "URL",
-          "default": "https://www.youtube.com/watch?v=lVdIGHZ-I28&list=PL7B04A852ACF0F7CE"
+          "minLength": 1
         },
         "extractAudio": {
           "required": true,
@@ -74,9 +73,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
   explore.addEventListener('click', () => {
     window.api.send('explore')
-  })
-
-  clear.addEventListener('click', () => {
-    logs.value = ''
   })
 })

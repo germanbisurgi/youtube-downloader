@@ -1,12 +1,18 @@
 @import "bootstrap.min.css";
+@import "fontawesome.css";
 
 * {
   margin: 0;
   padding: 0;
+  color: #333;
 }
 
 textarea {
   font-family: monospace;
+}
+
+.card {
+  background-color: transparent !important;
 }
 
 #command {
@@ -19,7 +25,7 @@ textarea {
 
 #logs {
   background: #000;
-  color: #fff;
+  color: #00ff41;
   font-size: 12px;
   padding: 15px;
   width: 100%;
