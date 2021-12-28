@@ -16,7 +16,9 @@ Commandante.prototype.command = function (command, args, options) {
     this.onLogs(`${data}`);
   });
   
-  this.child.on('error', (error) => this.onLogs(`error: ${error.message}`));
+  this.child.on('error', (error) => {
+    this.onLogs(`error: ${error.message}`)
+  })
   
   this.child.on('exit', (code, signal) => {
     if (code) this.onLogs(`Process exit with code: ${code} \n`);
@@ -37,6 +39,7 @@ Commandante.prototype.kill = function () {
 
 Commandante.prototype.onLogs = function () {}
 Commandante.prototype.onExit = function () {}
+Commandante.prototype.onError = function () {}
 
 const commandante = new Commandante()
 

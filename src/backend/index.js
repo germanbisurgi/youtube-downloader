@@ -1,19 +1,11 @@
 const commandante = require('./commandante')
-const { app, BrowserWindow, ipcMain, shell, screen} = require('electron')
+const utils = require('./utils')
 const path = require('path')
-const fs = require('fs');
-//require('electron-reloader')(module)
+const { app, BrowserWindow, ipcMain, shell, screen } = require('electron')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let win
 const outputDir = path.join(app.getPath('home'), 'youtube-downloader')
-
-
-const createOutputFolder = () => {
-  if (!fs.existsSync(outputDir)){
-    fs.mkdirSync(outputDir);
-  }
-}
 
 const createWindow = () => {
   let display = screen.getPrimaryDisplay();
@@ -37,11 +29,11 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   createWindow()
-  createOutputFolder()
+  utils.createFolderIfNotExists(outputDir)
 })
 
 ipcMain.on('explore', () => {
-  createOutputFolder()
+  utils.createFolderIfNotExists(outputDir)
   shell.openPath(outputDir)
 })
 
@@ -49,8 +41,8 @@ ipcMain.on('abort', () => {
   commandante.kill()
 })
 
-ipcMain.on('submit', (event, config) => {
-  console.log('submit', config)
+ipcMain.on('download', (event, config) => {
+  console.log('download', config)
   
   const args = [
     config.url
@@ -67,10 +59,13 @@ ipcMain.on('submit', (event, config) => {
   const options = {
     cwd: outputDir
   }
+  console.log('utils.isPackaged', utils.isPackaged)
 
-  win.webContents.send('command', config.command + ' ' + args.join(' '))
 
-  commandante.command(config.command, args, options)
+  let command = utils.isPackaged() ? path.join(process.resourcesPath, 'bin', 'yt-dlp') : 'yt-dlp'
+  console.log('command', command)
+
+  commandante.command(command, args, options)
 })
 
 commandante.onLogs = (log) => {

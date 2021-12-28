@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/share/yarn/bin/yarn.js build-win
+  /usr/local/bin/node /usr/share/yarn/bin/yarn.js build-linux
 
 PATH: 
   /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
@@ -14,7 +14,7 @@ Platform:
   linux x64
 
 Trace: 
-  SyntaxError: /home/germanbisurgi/Sites/electron-app/package.json: Unexpected token } in JSON at position 604
+  SyntaxError: /home/germanbisurgi/Sites/youtube-downloader/package.json: Unexpected token } in JSON at position 1190
       at JSON.parse (<anonymous>)
       at /usr/share/yarn/lib/cli.js:1625:59
       at Generator.next (<anonymous>)
@@ -36,23 +36,43 @@ npm manifest:
       "build-linux": "electron-builder build -l",
       "build-mac": "electron-builder build -m",
       "build-win": "electron-builder build -w",
-      "postinstall": "electron-builder install-app-deps",
+      "postinstall": "electron-builder install-app-deps"
     },
     "build": {
+      "productName": "youtube-downloader",
       "appId": "com.youtube-downloader",
+      "extraFiles": [
+        {
+          "from": "bin",
+          "to": "resources/bin",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ],
       "linux": {
+        "icon": "build/icons",
         "category": "Utility",
-        "target": ["deb"]
+        "target": [
+          "deb"
+        ]
       },
       "mac": {
-        "category": "your.app.category.type"
+        "target": [
+          "dmg"
+        ],
+        "icon": "build/icon.png",
+        "category": "public.app-category.utility"
       },
       "win": {
-        "target": "portable"
+        "icon": "build/icons/icon.ico",
+        "target": "nsis",
+        
       }
     },
     "dependencies": {
       "@json-editor/json-editor": "^2.6.1",
+      "electron-is-packaged": "^1.0.2",
       "tree-kill": "^1.2.2"
     },
     "devDependencies": {
@@ -894,6 +914,11 @@ Lockfile:
     version "1.2.0"
     resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
     integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
+  
+  electron-is-packaged@^1.0.2:
+    version "1.0.2"
+    resolved "https://registry.yarnpkg.com/electron-is-packaged/-/electron-is-packaged-1.0.2.tgz#d4efc0dc14991ab981de65f52271badf92323c7e"
+    integrity sha512-JZpV9QgVsehop7tm3KDll2/iJ9K3e7mL+jm6E3gA96zurIhxv3FZ0kxJK0eGL9c3SYORU1rN+/q2Ia8/v62Pjw==
   
   electron-osx-sign@^0.5.0:
     version "0.5.0"

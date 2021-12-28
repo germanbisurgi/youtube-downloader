@@ -22,22 +22,41 @@
       "category": "Utility",
       "target": [
         "deb"
+      ],
+      "extraFiles": [
+        {
+          "from": "bin/linux",
+          "to": "resources/bin",
+          "filter": [
+            "**/*"
+          ]
+        }
       ]
     },
     "mac": {
-			"target": [
-				"dmg"
-			],
-			"icon": "build/icon.png",
-			"category": "public.app-category.utility"
-		},
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.utility"
+    },
     "win": {
       "icon": "build/icons/icon.ico",
-      "target": "nsis"
+      "target": "nsis",
+      "extraFiles": [
+        {
+          "from": "bin/win",
+          "to": "resources/bin",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
     }
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.6.1",
+    "electron-is-packaged": "^1.0.2",
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {

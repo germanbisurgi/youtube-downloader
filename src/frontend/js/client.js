@@ -3,7 +3,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const abort = document.querySelector('#abort')
   const explore = document.querySelector('#explore')
   abort.disabled = true
-  const submit = document.querySelector('#submit')
+  const download = document.querySelector('#download')
   const editorContainer = document.querySelector('#editor-container')
   const editor = new JSONEditor(editorContainer, {
     disable_edit_json: true,
@@ -17,24 +17,12 @@ window.addEventListener('DOMContentLoaded', () => {
       "type": "object",
       "title": "Youtube Downloader",
       "properties": {
-        "command": {
-          "required": true,
-          "type": "string",
-          "title": "Command",
-          "enum": [
-            "youtube-dl",
-            "yt-dlp"
-          ],
-          "default": "yt-dlp",
-          "options": {
-            "hidden": true
-          }
-        },
         "url": {
           "required": true,
           "type": "string",
           "title": "URL",
-          "minLength": 1
+          "minLength": 1,
+          "default": "https://www.youtube.com/watch?v=5NehOiCz4LE"
         },
         "extractAudio": {
           "required": true,
@@ -57,14 +45,19 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   window.api.on('exit', () => {
-    submit.disabled = false
+    download.disabled = false
     abort.disabled = true
   })
 
-  submit.addEventListener('click', () => {
-    submit.disabled = true
-    abort.disabled = false
-    window.api.send('submit', editor.getValue())
+  download.addEventListener('click', () => {
+    const errors = editor.validate();
+    if (errors.length) {
+      alert('Please check the form data')
+    } else {
+      download.disabled = true
+      abort.disabled = false
+      window.api.send('download', editor.getValue())
+    }
   })
 
   abort.addEventListener('click', () => {

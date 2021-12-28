@@ -2,3 +2,6 @@
 - icons
 - windows build
 - mac build 
+- utils file (paths, plattforms, isPackaged, etc)
+- ELECTRON_DISABLE_SECURITY_WARNINGS
+- eslint
