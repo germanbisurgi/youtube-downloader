@@ -62,7 +62,6 @@
   },
   "devDependencies": {
     "electron": "^16.0.5",
-    "electron-builder": "^22.14.5",
-    "electron-installer-debian": "^3.1.0"
+    "electron-builder": "^22.14.5"
   }
 }
