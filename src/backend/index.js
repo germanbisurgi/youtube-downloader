@@ -2,6 +2,7 @@ const commandante = require('./commandante')
 const utils = require('./utils')
 const path = require('path')
 const { app, BrowserWindow, ipcMain, shell, screen } = require('electron')
+const { rootPath } = require('electron-root-path')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let win
@@ -60,15 +61,29 @@ ipcMain.on('download', (event, config) => {
     cwd: outputDir
   }
 
-  let command = 'yt-dlp'
+  let command
 
   if (utils.isPackaged()) {
-    if (utils.isLinux() || utils.isMac()) {
+    if (utils.isLinux()) {
       command = path.join(process.resourcesPath, 'bin', 'yt-dlp')
+    }
+    if (utils.isMac()) {
+      command = path.join(process.resourcesPath, 'bin', 'yt-dlp')
+    }
+    if (utils.isWin()) {
+      command = path.join(process.resourcesPath, 'bin', 'yt-dlp.exe')
+    }
+  } else {
+    if (utils.isLinux()) {
+      command = path.join(rootPath, 'bin', 'linux', 'yt-dlp')
+    }
+
+    if (utils.isMac()) {
+      command = path.join(rootPath, 'bin', 'mac', 'yt-dlp')
     }
 
     if (utils.isWin()) {
-      command = path.join(process.resourcesPath, 'bin', 'yt-dlp.exe')
+      command = path.join(rootPath, 'bin', 'win', 'yt-dlp.exe')
     }
   }
 
