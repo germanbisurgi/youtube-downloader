@@ -59,10 +59,19 @@ ipcMain.on('download', (event, config) => {
   const options = {
     cwd: outputDir
   }
-  console.log('utils.isPackaged', utils.isPackaged)
 
+  let command = 'yt-dlp'
 
-  let command = utils.isPackaged() ? path.join(process.resourcesPath, 'bin', 'yt-dlp') : 'yt-dlp'
+  if (utils.isPackaged()) {
+    if (utils.isLinux() || utils.isMac()) {
+      command = path.join(process.resourcesPath, 'bin', 'yt-dlp')
+    }
+
+    if (utils.isWin()) {
+      command = path.join(process.resourcesPath, 'bin', 'yt-dlp.exe')
+    }
+  }
+
   console.log('command', command)
 
   commandante.command(command, args, options)
