@@ -5,14 +5,14 @@ const { app, BrowserWindow, ipcMain, shell, screen } = require('electron')
 const { rootPath } = require('electron-root-path')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-let win
+let mainWindow
 const outputDir = path.join(app.getPath('home'), 'youtube-downloader')
 
 const createWindow = () => {
   let display = screen.getPrimaryDisplay();
   let width = display.bounds.width;
   let height = display.bounds.height;
-  win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     height: height,
     width: 600,
     x: width - 600,
@@ -25,7 +25,7 @@ const createWindow = () => {
       preload: path.join(__dirname, "preload.js")
     }
   })
-  win.loadFile(path.join(__dirname, '..', 'frontend', 'index.html'))
+  mainWindow.loadFile(path.join(__dirname, '..', 'frontend', 'index.html'))
 }
 
 app.whenReady().then(() => {
@@ -87,16 +87,14 @@ ipcMain.on('download', (event, config) => {
     }
   }
 
-  console.log('command', command)
-
   commandante.command(command, args, options)
 })
 
 commandante.onLogs = (log) => {
   console.log(log)
-  win.webContents.send('logs', log)
+  mainWindow.webContents.send('logs', log)
 }
 
 commandante.onExit = () => {
-  win.webContents.send('exit')
+  mainWindow.webContents.send('exit')
 }
