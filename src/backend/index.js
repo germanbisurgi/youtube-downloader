@@ -3,15 +3,15 @@ const utils = require('./utils')
 const path = require('path')
 const { app, BrowserWindow, ipcMain, shell, screen } = require('electron')
 const { rootPath } = require('electron-root-path')
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 let mainWindow
 const outputDir = path.join(app.getPath('home'), 'youtube-downloader')
 
 const createWindow = () => {
-  let display = screen.getPrimaryDisplay();
-  let width = display.bounds.width;
-  let height = display.bounds.height;
+  const display = screen.getPrimaryDisplay()
+  const width = display.bounds.width
+  const height = display.bounds.height
   mainWindow = new BrowserWindow({
     height: height,
     width: 600,
@@ -22,7 +22,7 @@ const createWindow = () => {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, "preload.js")
+      preload: path.join(__dirname, 'preload.js')
     }
   })
   mainWindow.loadFile(path.join(__dirname, '..', 'frontend', 'index.html'))
@@ -44,7 +44,7 @@ ipcMain.on('abort', () => {
 
 ipcMain.on('download', (event, config) => {
   console.log('download', config)
-  
+
   const args = [
     config.url
   ]

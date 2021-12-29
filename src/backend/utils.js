@@ -5,7 +5,7 @@ const { platform } = require('os')
 const Utils = function () {}
 
 Utils.prototype.createFolderIfNotExists = function (path) {
-  if (!fs.existsSync(path)){
+  if (!fs.existsSync(path)) {
     fs.mkdirSync(path)
   }
 }

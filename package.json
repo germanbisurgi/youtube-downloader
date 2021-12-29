@@ -12,7 +12,8 @@
     "build-linux": "electron-builder build -l",
     "build-mac": "electron-builder build -m",
     "build-win": "electron-builder build -w",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "eslint": "eslint --fix ./src/frontend"
   },
   "build": {
     "productName": "youtube-downloader",
@@ -62,6 +63,11 @@
   },
   "devDependencies": {
     "electron": "^16.0.5",
-    "electron-builder": "^22.14.5"
+    "electron-builder": "^22.14.5",
+    "eslint": "^8.5.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.0.0"
   }
 }

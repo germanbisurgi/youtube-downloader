@@ -1,3 +1,4 @@
+/* global JSONEditor command */
 window.addEventListener('DOMContentLoaded', () => {
   const logs = document.querySelector('#logs')
   const abort = document.querySelector('#abort')
@@ -13,23 +14,23 @@ window.addEventListener('DOMContentLoaded', () => {
     show_errors: 'always',
     theme: 'bootstrap4',
     schema: {
-      "required": true,
-      "type": "object",
-      "title": "Youtube Downloader",
-      "properties": {
-        "url": {
-          "required": true,
-          "type": "string",
-          "title": "URL",
-          "minLength": 1,
-          "default": "https://www.youtube.com/watch?v=5NehOiCz4LE"
+      required: true,
+      type: 'object',
+      title: 'Youtube Downloader',
+      properties: {
+        url: {
+          required: true,
+          type: 'string',
+          title: 'URL',
+          minLength: 1,
+          default: 'https://www.youtube.com/watch?v=5NehOiCz4LE'
         },
-        "extractAudio": {
-          "required": true,
-          "type": "boolean",
-          "title": "Audio Only",
-          "format": "checkbox",
-          "default": false
+        extractAudio: {
+          required: true,
+          type: 'boolean',
+          title: 'Audio Only',
+          format: 'checkbox',
+          default: false
         }
       }
     }
@@ -41,7 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   window.api.on('logs', (event, message) => {
     logs.value += message
-    logs.scrollTop = logs.scrollHeight;
+    logs.scrollTop = logs.scrollHeight
   })
 
   window.api.on('exit', () => {
@@ -50,7 +51,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   download.addEventListener('click', () => {
-    const errors = editor.validate();
+    const errors = editor.validate()
     if (errors.length) {
       alert('Please check the form data')
     } else {
