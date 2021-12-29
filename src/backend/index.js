@@ -3,7 +3,6 @@ const utils = require('./utils')
 const path = require('path')
 const { app, BrowserWindow, ipcMain, shell, screen } = require('electron')
 const { rootPath } = require('electron-root-path')
-process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 let mainWindow
 const outputDir = path.join(app.getPath('home'), 'youtube-downloader')
