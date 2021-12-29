@@ -43,16 +43,16 @@ yarn build-mac
 yarn build-win
 ```
 
-As electron-builder documentation says: Don’t expect that you can build app for all platforms on one platform. If your app has native dependency, it can be compiled only on the target platform.
+*Important*: As electron-builder documentation says: Don’t expect that you can build app for all platforms on one platform. If your app has native dependency, it can be compiled only on the target platform.
 
-### The build folder
+### The `build` folder
 
 Used as a look up folder for icons by electron-builder.
 
-### The bin folder
+### The `bin` folder
 
 Precompiled binaries lives in the `bin` directory. It's contents will be copied at runtime into the native app when building for distribution. This is how this project works without out of the box withount leaving to the user the task of downloading dependencies. The paths to each binary will change from development and production.
 
-### The dist folder
+### The `dist` folder
 
 Where lectron-builder packaged and compiled apps are stored.
