@@ -90,7 +90,7 @@ ipcMain.on('download', (event, config) => {
 })
 
 commandante.onLogs = (log) => {
-  console.log(log)
+  console.log('...', log)
   mainWindow.webContents.send('logs', log)
 }
 

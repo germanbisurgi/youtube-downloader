@@ -1,6 +1,6 @@
 # youtube-downloader
 
-An Electron App to download youtube single videos or entire playlists. It uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the downloading part and the [json-editor](https://github.com/json-editor/json-editor) for the interface configuration.
+An Electron App to download youtube single videos, playlists or entire channels. It uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the downloading part and the [json-editor](https://github.com/json-editor/json-editor) for the interface configuration.
 
 ## Features
 
