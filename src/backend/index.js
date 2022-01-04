@@ -30,6 +30,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow()
   utils.createFolderIfNotExists(outputDir)
+  mainWindow.setMenuBarVisibility(false);
 })
 
 ipcMain.on('explore', () => {
