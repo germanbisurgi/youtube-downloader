@@ -7,6 +7,7 @@
   "repository": "git@github.com:germanbisurgi/electron-app.git",
   "license": "MIT",
   "scripts": {
+    "start": "yarn electron",
     "electron": "electron ./src/backend/index.js",
     "build-all": "electron-builder build -mwl",
     "build-linux": "electron-builder build -l",
@@ -38,7 +39,7 @@
       "target": [
         "dmg"
       ],
-      "icon": "build/icon.png",
+      "icon": "build/icons/icon.png",
       "category": "public.app-category.utility"
     },
     "win": {
