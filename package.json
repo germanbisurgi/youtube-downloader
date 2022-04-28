@@ -40,7 +40,16 @@
         "dmg"
       ],
       "icon": "build/icons/icon.png",
-      "category": "public.app-category.utility"
+      "category": "public.app-category.utility",
+      "extraFiles": [
+        {
+          "from": "bin/mac",
+          "to": "resources/bin",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
     },
     "win": {
       "icon": "build/icons/icon.ico",
@@ -58,6 +67,7 @@
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.6.1",
+    "deepmerge": "^4.2.2",
     "electron-is-packaged": "^1.0.2",
     "electron-root-path": "^1.0.16",
     "tree-kill": "^1.2.2"

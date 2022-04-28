@@ -45,22 +45,6 @@ ipcMain.on('abort', () => {
 ipcMain.on('download', (event, config) => {
   console.log('download', config)
 
-  const args = [
-    config.url
-  ]
-
-  if (config.url.includes('&list=')) {
-    args.unshift('-o %(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s')
-  }
-
-  if (config.extractAudio) {
-    args.unshift('--extract-audio')
-  }
-
-  const options = {
-    cwd: outputDir
-  }
-
   let command
 
   if (utils.isPackaged()) {
@@ -87,7 +71,24 @@ ipcMain.on('download', (event, config) => {
     }
   }
 
-  commandante.command(command, args, options)
+  command += ' '
+  command += config.url
+
+  command += ' --no-check-certificate'
+
+  if (config.url.includes('&list=')) {
+    command += ' -o %(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s'
+  }
+
+  if (config.extractAudio) {
+    command += ' --extract-audio'
+  }
+
+  const options = {
+    cwd: outputDir
+  }
+
+  commandante.command(command, options)
 })
 
 commandante.onLogs = (log) => {

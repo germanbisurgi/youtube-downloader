@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   window.api.on('logs', (event, message) => {
-    logs.value += message
+    logs.value += message.message
     logs.scrollTop = logs.scrollHeight
   })
 
