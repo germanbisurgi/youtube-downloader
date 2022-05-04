@@ -23,7 +23,7 @@ window.addEventListener('DOMContentLoaded', () => {
           type: 'string',
           title: 'URL',
           minLength: 1,
-          default: 'https://www.youtube.com/watch?v=5NehOiCz4LE'
+          default: 'https://www.youtube.com/watch?v=wpJYQf5uJ4w&list=PLUhYAiEwD-whqQ2Ak4wBJxO6WnS15l8AN'
         },
         extractAudio: {
           required: true,
@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   window.api.on('logs', (event, message) => {
-    logs.value += message.message
+    logs.value += message.message + '\n'
     logs.scrollTop = logs.scrollHeight
   })
 

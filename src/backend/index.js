@@ -71,18 +71,22 @@ ipcMain.on('download', (event, config) => {
     }
   }
 
-  command += ' '
-  command += config.url
-
   command += ' --no-check-certificate'
+  command += ' --no-part'
+  command += ' --ffmpeg-location ' + path.join(rootPath, 'bin', 'mac', 'ffmpeg')
 
   if (config.url.includes('&list=')) {
-    command += ' -o %(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s'
+    command += ' --yes-playlist'
+    command += ' --output "%(playlist_title)s/%(playlist_index)s_%(title)s.%(ext)s"'
   }
 
   if (config.extractAudio) {
     command += ' --extract-audio'
+    command += ' --audio-format mp3'
   }
+
+  command += ' '
+  command += '"' + config.url + '"'
 
   const options = {
     cwd: outputDir
