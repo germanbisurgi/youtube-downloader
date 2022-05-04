@@ -1,26 +1,22 @@
 const { spawn } = require('child_process')
 const kill = require('tree-kill')
-const path = require('path')
-const os = require("os")
-const { app } = require('electron')
-const merge = require('deepmerge')
+const os = require('os')
+const deepmerge = require('deepmerge')
 
-const Commandante = function () {
+const Comandante = function () {
   this.process = null
 }
 
-Commandante.prototype.log = function (type, message) {
+Comandante.prototype.log = function (type, message) {
   this.onLogs({
     type: type,
-    message: message,
+    message: message
   })
 }
 
-Commandante.prototype.command = function (command, options = {}) {
+Comandante.prototype.command = function (command, options = {}) {
   const defaultOptions = { env: process.env.PATH }
-  const mergedOptions = merge(defaultOptions, options)
-
-  console.log('-------------', command, mergedOptions)
+  const mergedOptions = deepmerge(defaultOptions, options)
 
   this.process = spawn('bash', ['-c', command], mergedOptions)
 
@@ -48,7 +44,7 @@ Commandante.prototype.command = function (command, options = {}) {
   this.log('prompt', user + ':' + folder + ' ' + command)
 }
 
-Commandante.prototype.kill = function () {
+Comandante.prototype.kill = function () {
   if (this.process) {
     kill(this.process.pid, 'SIGTERM', function (err) {
       console.log('Killed process')
@@ -59,11 +55,10 @@ Commandante.prototype.kill = function () {
   }
 }
 
-Commandante.prototype.onLogs = function () {}
-Commandante.prototype.onClear = function () {}
-Commandante.prototype.onExit = function () {}
-Commandante.prototype.onError = function () {}
+Comandante.prototype.onLogs = function () {}
+Comandante.prototype.onExit = function () {}
+Comandante.prototype.onError = function () {}
 
-const commandante = new Commandante()
+const comandante = new Comandante()
 
-module.exports = commandante
+module.exports = comandante
