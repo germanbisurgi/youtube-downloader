@@ -46,6 +46,7 @@ ipcMain.on('download', (event, config) => {
   console.log('download', config)
 
   let command
+  let ffmpeg
 
   if (utils.isPackaged()) {
     if (utils.isLinux()) {
@@ -53,6 +54,7 @@ ipcMain.on('download', (event, config) => {
     }
     if (utils.isMac()) {
       command = path.join(process.resourcesPath, 'bin', 'yt-dlp')
+      ffmpeg = path.join(process.resourcesPath, 'bin', 'ffmpeg')
     }
     if (utils.isWin()) {
       command = path.join(process.resourcesPath, 'bin', 'yt-dlp.exe')
@@ -64,6 +66,7 @@ ipcMain.on('download', (event, config) => {
 
     if (utils.isMac()) {
       command = path.join(rootPath, 'bin', 'mac', 'yt-dlp')
+      ffmpeg = path.join(rootPath, 'bin', 'mac', 'ffmpeg')
     }
 
     if (utils.isWin()) {
@@ -73,7 +76,7 @@ ipcMain.on('download', (event, config) => {
 
   command += ' --no-check-certificate'
   command += ' --no-part'
-  command += ' --ffmpeg-location ' + path.join(rootPath, 'bin', 'mac', 'ffmpeg')
+  command += ' --ffmpeg-location ' + ffmpeg
 
   if (config.url.includes('&list=')) {
     command += ' --yes-playlist'
