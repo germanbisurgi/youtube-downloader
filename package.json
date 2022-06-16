@@ -73,7 +73,7 @@
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
-    "electron": "^16.0.6",
+    "electron": "^16.2.6",
     "electron-builder": "^22.14.5",
     "eslint": "^8.5.0",
     "eslint-config-standard": "^16.0.3",
