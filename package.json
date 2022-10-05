@@ -7,7 +7,7 @@
   "repository": "git@github.com:germanbisurgi/electron-app.git",
   "license": "MIT",
   "scripts": {
-    "start": "yarn electron",
+    "dev": "yarn electron",
     "electron": "electron ./src/backend/index.js",
     "build-all": "electron-builder build -mwl",
     "build-linux": "electron-builder build -l",
