@@ -1,58 +1,55 @@
 # youtube-downloader
 
-An Electron App to download youtube single videos, playlists or entire channels. It uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the downloading part and the [json-editor](https://github.com/json-editor/json-editor) for the interface configuration.
+This repository contains an Electron application that serves as a user interface (UI) for [yt-dlp](https://github.com/yt-dlp/yt-dlp), offering various features for downloading videos and playlists, as well as extracting audio (mp3) from both single videos and playlists.
 
-## Features
+## Installation and Development Setup
 
-- download single videos
-- download playlists
-- download only audio (mp3) for both single videos and playlists
+You can get started with the development of this application using either NPM or Yarn. Here are the steps:
 
-## Installation and Starting for development
-
-Whith NPM
-
-```
+Using NPM:
+```bash
 npm install
 npm run electron
 ```
-or with Yarn
 
-```
+Using Yarn:
+```bash
 yarn install
 yarn electron
 ```
 
-## Build
+## Building the Application
 
-This project uses [electron-builder](https://www.electron.build/) to package and build a ready for distribution Electron app for macOS, Windows and Linux.
+This project utilizes [electron-builder](https://www.electron.build/) to package and create distributable versions of the Electron app for macOS, Windows, and Linux.
 
-The configuration schema can be found in the package.json under the `"build"` key.
+The configuration schema for electron-builder can be found in the `package.json` file under the `"build"` key.
 
-Scrips were added to the package.json file to trigger the build processes:
+To trigger the build process, you can use the following scripts:
 
-```
+Using NPM:
+```bash
 npm run build-linux
 npm run build-mac
 npm run build-win
 ```
 
-```
+Using Yarn:
+```bash
 yarn build-linux
 yarn build-mac
 yarn build-win
 ```
 
-*Important*: As electron-builder documentation says: Don’t expect that you can build app for all platforms on one platform. If your app has native dependency, it can be compiled only on the target platform.
+**Important Note:** According to the electron-builder documentation, you cannot expect to build an app for all platforms on just one platform. If your app has native dependencies, it can only be compiled on the target platform where it is intended to run.
 
-### The `build` folder
+### The `build` Folder
 
-Used as a look up folder for icons by electron-builder.
+This folder serves as a lookup location for icons used by electron-builder during the build process.
 
-### The `bin` folder
+### The `bin` Folder
 
-Precompiled binaries lives in the `bin` directory. It's contents will be copied at runtime into the native app when building for distribution. This is how this project works without out of the box withount leaving to the user the task of downloading dependencies. The paths to each binary will change from development and production.
+The `bin` directory contains precompiled binaries required by the application. These binaries will be copied into the native app during the distribution build process. This approach ensures that the application works seamlessly without requiring users to manually download dependencies. Please note that the paths to these binaries may change between development and production.
 
-### The `dist` folder
+### The `dist` Folder
 
-Where lectron-builder packaged and compiled apps are stored.
+This directory is where electron-builder stores the packaged and compiled versions of the application for distribution.
