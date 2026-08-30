@@ -18,6 +18,8 @@ yarn install
 yarn electron
 ```
 
+On first launch, click **Install** next to `yt-dlp` and `ffmpeg` in the Dependencies panel at the top of the window — the Download button stays disabled until both finish installing.
+
 ## Building the Application
 
 This project utilizes [electron-builder](https://www.electron.build/) to package and create distributable versions of the Electron app for macOS, Windows, and Linux.
@@ -46,9 +48,9 @@ yarn build-win
 
 This folder serves as a lookup location for icons used by electron-builder during the build process.
 
-### The `bin` Folder
+### Managed dependencies (yt-dlp / ffmpeg)
 
-The `bin` directory contains precompiled binaries required by the application. These binaries will be copied into the native app during the distribution build process. This approach ensures that the application works seamlessly without requiring users to manually download dependencies. Please note that the paths to these binaries may change between development and production.
+This app does not bundle `yt-dlp` or `ffmpeg`. Instead, a "Dependencies" panel in the UI lets you install them on demand: it downloads the official upstream build for your OS (yt-dlp from its GitHub releases; ffmpeg from a platform-appropriate static build) into the app's own data directory, so no admin rights or system package manager are required. The same panel checks for and installs updates.
 
 ### The `dist` Folder
 

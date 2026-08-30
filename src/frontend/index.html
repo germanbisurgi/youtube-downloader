@@ -8,6 +8,23 @@
   </head>
   <body>
     <div class="container-fluid">
+      <div id="dependencies-container" class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2" data-dependency="yt-dlp">
+          <div><strong>yt-dlp</strong> <span class="badge badge-secondary" data-role="badge">checking...</span></div>
+          <button class="btn btn-sm btn-outline-primary" data-role="install-btn" disabled>
+            <span class="spinner-border spinner-border-sm d-none" data-role="spinner"></span>
+            <span data-role="btn-label">Install</span>
+          </button>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-2" data-dependency="ffmpeg">
+          <div><strong>ffmpeg</strong> <span class="badge badge-secondary" data-role="badge">checking...</span></div>
+          <button class="btn btn-sm btn-outline-primary" data-role="install-btn" disabled>
+            <span class="spinner-border spinner-border-sm d-none" data-role="spinner"></span>
+            <span data-role="btn-label">Install</span>
+          </button>
+        </div>
+      </div>
+      <hr>
       <div id="editor-container"></div>
       <hr>
       <div class="btn-group">

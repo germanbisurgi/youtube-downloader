@@ -1,5 +1,4 @@
 const fs = require('fs')
-const { isPackaged } = require('electron-is-packaged')
 const { platform } = require('os')
 
 const Utils = function () {}
@@ -20,10 +19,6 @@ Utils.prototype.isMac = function () {
 
 Utils.prototype.isWin = function () {
   return ['win32'].includes(platform())
-}
-
-Utils.prototype.isPackaged = function () {
-  return isPackaged
 }
 
 module.exports = new Utils()

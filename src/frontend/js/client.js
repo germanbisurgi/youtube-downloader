@@ -5,7 +5,97 @@ window.addEventListener('DOMContentLoaded', () => {
   const explore = document.querySelector('#explore')
   abort.disabled = true
   const download = document.querySelector('#download')
+  download.disabled = true
   const editorContainer = document.querySelector('#editor-container')
+
+  const depsState = {}
+  const dependencyRows = document.querySelectorAll('[data-dependency]')
+
+  const updateDownloadButtonState = () => {
+    const allInstalled = Object.values(depsState).every((status) => status && status.installed)
+    download.disabled = !allInstalled || !abort.disabled
+  }
+
+  const renderDependency = (name, status) => {
+    const row = document.querySelector(`[data-dependency="${name}"]`)
+    const badge = row.querySelector('[data-role="badge"]')
+    const button = row.querySelector('[data-role="install-btn"]')
+    const spinner = row.querySelector('[data-role="spinner"]')
+    const label = row.querySelector('[data-role="btn-label"]')
+
+    badge.className = 'badge'
+
+    if (status.installing) {
+      badge.classList.add('badge-info')
+      badge.textContent = status.progressText || 'installing...'
+      button.disabled = true
+      spinner.classList.remove('d-none')
+      return
+    }
+
+    spinner.classList.add('d-none')
+    button.disabled = false
+
+    if (!status.installed) {
+      badge.classList.add('badge-danger')
+      badge.textContent = 'not installed'
+      label.textContent = 'Install'
+    } else if (status.updateAvailable) {
+      badge.classList.add('badge-warning')
+      badge.textContent = `update available (${status.version} → ${status.latestVersion})`
+      label.textContent = 'Update'
+    } else {
+      badge.classList.add('badge-success')
+      badge.textContent = `installed v${status.version}`
+      label.textContent = 'Install'
+    }
+  }
+
+  const refreshStatus = async () => {
+    const status = await window.api.invoke('dependencies:status')
+
+    for (const name of Object.keys(status)) {
+      depsState[name] = status[name]
+    }
+
+    for (const name of Object.keys(status)) {
+      if (status[name].installed) {
+        const update = await window.api.invoke('dependencies:check-update', { name })
+        depsState[name] = { ...depsState[name], ...update }
+      }
+      renderDependency(name, depsState[name])
+    }
+
+    updateDownloadButtonState()
+  }
+
+  dependencyRows.forEach((row) => {
+    const name = row.dataset.dependency
+    const button = row.querySelector('[data-role="install-btn"]')
+
+    button.addEventListener('click', async () => {
+      depsState[name] = { ...depsState[name], installing: true, progressText: 'installing...' }
+      renderDependency(name, depsState[name])
+
+      try {
+        await window.api.invoke('dependencies:install', { name })
+      } catch (error) {
+        alert(`Failed to install ${name}: ${error.message}`)
+      } finally {
+        depsState[name] = { ...depsState[name], installing: false }
+        await refreshStatus()
+      }
+    })
+  })
+
+  window.api.on('dependencies:progress', (event, { name, phase, percent }) => {
+    const progressText = percent === null || percent === undefined ? `${phase}...` : `${phase}... ${percent}%`
+    depsState[name] = { ...depsState[name], installing: true, progressText }
+    renderDependency(name, depsState[name])
+  })
+
+  refreshStatus()
+
   const editor = new JSONEditor(editorContainer, {
     disable_edit_json: true,
     disable_properties: true,
@@ -31,6 +121,34 @@ window.addEventListener('DOMContentLoaded', () => {
           title: 'Audio Only',
           format: 'checkbox',
           default: false
+        },
+        includeCaptions: {
+          required: true,
+          type: 'boolean',
+          title: 'Captions',
+          format: 'checkbox',
+          default: false
+        },
+        includeComments: {
+          required: true,
+          type: 'boolean',
+          title: 'Comments',
+          format: 'checkbox',
+          default: false
+        },
+        minLikes: {
+          required: true,
+          type: 'integer',
+          title: 'Minimum Likes (comments)',
+          minimum: 0,
+          default: 0
+        },
+        minTextLength: {
+          required: true,
+          type: 'integer',
+          title: 'Minimum Text Length (comments)',
+          minimum: 0,
+          default: 0
         }
       }
     }
@@ -46,8 +164,8 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   window.api.on('exit', () => {
-    download.disabled = false
     abort.disabled = true
+    updateDownloadButtonState()
   })
 
   download.addEventListener('click', () => {
