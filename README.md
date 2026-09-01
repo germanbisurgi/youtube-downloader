@@ -1,68 +1,34 @@
 # youtube-downloader
 
-This repository contains an Electron application that serves as a user interface (UI) for [yt-dlp](https://github.com/yt-dlp/yt-dlp), offering various features for downloading videos and playlists, as well as extracting audio (mp3) from both single videos and playlists.
+An Electron app for downloading YouTube videos/playlists or extracting audio (mp3) via [yt-dlp](https://github.com/yt-dlp/yt-dlp), plus an MCP server exposing the same functionality to an MCP client (Claude Desktop/Code).
 
-## Installation and Development Setup
+## Quick start
 
-You can get started with the development of this application using either NPM or Yarn. Here are the steps:
-
-Using NPM:
 ```bash
-npm install
-npm run electron
+make dev
 ```
 
-Using Yarn:
+On first launch, click **Install** next to `yt-dlp` and `ffmpeg` in the Dependencies panel — the Download button stays disabled until both finish. No bundled binaries, no admin rights needed; they're downloaded into the app's own data directory and can be updated from the same panel.
+
+If a download fails with `Sign in to confirm you're not a bot`, set **Cookies From Browser** in the form to a browser you're logged into YouTube with (Firefox works out of the box; Chrome/Safari may prompt for Keychain/Full Disk Access).
+
+## Commands
+
 ```bash
-yarn install
-yarn electron
+make help
 ```
 
-On first launch, click **Install** next to `yt-dlp` and `ffmpeg` in the Dependencies panel at the top of the window — the Download button stays disabled until both finish installing.
+| command | what it does |
+|---|---|
+| `make dev` | install deps, launch the app |
+| `make mcp` | install deps, launch the MCP server (stdio) |
+| `make lint` | lint + autofix `./src/frontend` |
+| `make build-mac` / `build-linux` / `build-win` / `build-all` | package with electron-builder |
+| `make clean` | remove `node_modules`/`dist` |
 
-If a download fails with `Sign in to confirm you're not a bot`, set **Cookies From Browser** in the form to a browser you're logged into YouTube with (Firefox works out of the box; Chrome/Safari may prompt for Keychain or Full Disk Access to decrypt their cookie store, since macOS restricts reading them directly).
+## MCP server
 
-## Building the Application
-
-This project utilizes [electron-builder](https://www.electron.build/) to package and create distributable versions of the Electron app for macOS, Windows, and Linux.
-
-The configuration schema for electron-builder can be found in the `package.json` file under the `"build"` key.
-
-To trigger the build process, you can use the following scripts:
-
-Using NPM:
-```bash
-npm run build-linux
-npm run build-mac
-npm run build-win
-```
-
-Using Yarn:
-```bash
-yarn build-linux
-yarn build-mac
-yarn build-win
-```
-
-**Important Note:** According to the electron-builder documentation, you cannot expect to build an app for all platforms on just one platform. If your app has native dependencies, it can only be compiled on the target platform where it is intended to run.
-
-### The `build` Folder
-
-This folder serves as a lookup location for icons used by electron-builder during the build process.
-
-### Managed dependencies (yt-dlp / ffmpeg)
-
-This app does not bundle `yt-dlp` or `ffmpeg`. Instead, a "Dependencies" panel in the UI lets you install them on demand: it downloads the official upstream build for your OS (yt-dlp from its GitHub releases; ffmpeg from a platform-appropriate static build) into the app's own data directory, so no admin rights or system package manager are required. The same panel checks for and installs updates.
-
-### The `dist` Folder
-
-This directory is where electron-builder stores the packaged and compiled versions of the application for distribution.
-
-### MCP server
-
-Besides the GUI, `src/mcp/server.js` exposes the same download functionality as an [MCP](https://modelcontextprotocol.io) server, so an MCP client (e.g. Claude Desktop or Claude Code) can trigger a download directly. It shares the same output folder and yt-dlp/ffmpeg install as the GUI app — install the dependencies from the GUI's Dependencies panel first (the MCP server itself only checks for them, via `check_dependencies`; it doesn't install them).
-
-Run it with `yarn mcp`, or point an MCP client's config at it directly, e.g. for Claude Desktop/Code (`claude_desktop_config.json` / `.mcp.json`):
+`src/mcp/server.js` shares the same output folder and yt-dlp/ffmpeg install as the GUI — install the dependencies from the GUI's Dependencies panel first (the MCP server only checks for them via `check_dependencies`, it doesn't install them).
 
 ```json
 {
@@ -75,4 +41,8 @@ Run it with `yarn mcp`, or point an MCP client's config at it directly, e.g. for
 }
 ```
 
-Tools: `check_dependencies` (read-only status check) and `download_media` (downloads video/audio, optionally captions/comments; blocks until yt-dlp exits and returns its log).
+Tools: `check_dependencies` (read-only status) and `download_media` (downloads video/audio, optionally captions/comments; blocks until yt-dlp exits and returns its log).
+
+## Building
+
+electron-builder cannot cross-compile native deps — build a platform's target only on that platform. Config is in `package.json` under `"build"`; icons live in `build/`, output goes to `dist/`.

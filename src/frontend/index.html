@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./css/index.css">
@@ -10,14 +10,14 @@
     <div class="container-fluid">
       <div id="dependencies-container" class="mb-3">
         <div class="d-flex align-items-center justify-content-between mb-2" data-dependency="yt-dlp">
-          <div><strong>yt-dlp</strong> <span class="badge badge-secondary" data-role="badge">checking...</span></div>
+          <div><strong>yt-dlp</strong> <span class="badge bg-secondary" data-role="badge">checking...</span></div>
           <button class="btn btn-sm btn-outline-primary" data-role="install-btn" disabled>
             <span class="spinner-border spinner-border-sm d-none" data-role="spinner"></span>
             <span data-role="btn-label">Install</span>
           </button>
         </div>
         <div class="d-flex align-items-center justify-content-between mb-2" data-dependency="ffmpeg">
-          <div><strong>ffmpeg</strong> <span class="badge badge-secondary" data-role="badge">checking...</span></div>
+          <div><strong>ffmpeg</strong> <span class="badge bg-secondary" data-role="badge">checking...</span></div>
           <button class="btn btn-sm btn-outline-primary" data-role="install-btn" disabled>
             <span class="spinner-border spinner-border-sm d-none" data-role="spinner"></span>
             <span data-role="btn-label">Install</span>
@@ -25,24 +25,24 @@
         </div>
       </div>
       <hr>
-      <div id="editor-container"></div>
+      <div id="form-container"></div>
       <hr>
       <div class="btn-group">
-        <button id="download" class="btn btn-success">
-          <i class="fas fa-play"></i>
+        <button id="download" class="btn btn-primary">
+          <i class="bi bi-play-fill"></i>
         </button>
         <button id="abort" class="btn">
-          <i class="fas fa-stop-circle"></i>
+          <i class="bi bi-stop-circle-fill"></i>
         </button>
         <button id="explore" class="btn">
-          <i class="fas fa-folder-open"></i>
+          <i class="bi bi-folder2-open"></i>
         </button>
       </div>
       <hr>
       <label for="logs">Logs</label>
-      <textarea id="logs"></textarea>
+      <textarea id="logs" class="form-control font-monospace" rows="15"></textarea>
     </div>
-    <script src="./js/jsoneditor.min.js"></script>
+    <script src="./js/jedison.umd.js"></script>
     <script src="./js/storage.js"></script>
     <script src="./js/client.js"></script>
   </body>

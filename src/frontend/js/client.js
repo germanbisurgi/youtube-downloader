@@ -1,4 +1,4 @@
-/* global JSONEditor command */
+/* global Jedison command */
 window.addEventListener('DOMContentLoaded', () => {
   const logs = document.querySelector('#logs')
   const abort = document.querySelector('#abort')
@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
   abort.disabled = true
   const download = document.querySelector('#download')
   download.disabled = true
-  const editorContainer = document.querySelector('#editor-container')
+  const formContainer = document.querySelector('#form-container')
 
   const depsState = {}
   const dependencyRows = document.querySelectorAll('[data-dependency]')
@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
     badge.className = 'badge'
 
     if (status.installing) {
-      badge.classList.add('badge-info')
+      badge.classList.add('bg-info')
       badge.textContent = status.progressText || 'installing...'
       button.disabled = true
       spinner.classList.remove('d-none')
@@ -42,15 +42,15 @@ window.addEventListener('DOMContentLoaded', () => {
     button.disabled = anyDependencyInstalling()
 
     if (!status.installed) {
-      badge.classList.add('badge-danger')
+      badge.classList.add('bg-danger')
       badge.textContent = 'not installed'
       label.textContent = 'Install'
     } else if (status.updateAvailable) {
-      badge.classList.add('badge-warning')
+      badge.classList.add('bg-warning')
       badge.textContent = `update available (${status.version} → ${status.latestVersion})`
       label.textContent = 'Update'
     } else {
-      badge.classList.add('badge-success')
+      badge.classList.add('bg-success')
       badge.textContent = status.version ? `installed v${status.version}` : 'installed (checking version...)'
       label.textContent = 'Install'
       // already installed and no update known — nothing for a click to do
@@ -116,80 +116,67 @@ window.addEventListener('DOMContentLoaded', () => {
 
   refreshStatus()
 
-  const editor = new JSONEditor(editorContainer, {
-    disable_edit_json: true,
-    disable_properties: true,
-    disable_collapse: true,
-    show_opt_in: true,
-    show_errors: 'always',
-    theme: 'bootstrap4',
-    startval: window.storage.loadLastConfig() || undefined,
+  const jedisonForm = new Jedison.Create({
+    container: formContainer,
+    theme: new Jedison.ThemeBootstrap5(),
+    iconLib: 'bootstrap-icons',
+    data: window.storage.loadLastConfig() || undefined,
     schema: {
-      required: true,
       type: 'object',
+      additionalProperties: false,
       title: 'Youtube Downloader',
       properties: {
         url: {
-          required: true,
           type: 'string',
           title: 'URL',
           minLength: 1,
           default: 'https://www.youtube.com/watch?v=wpJYQf5uJ4w&list=PLUhYAiEwD-whqQ2Ak4wBJxO6WnS15l8AN'
         },
         media: {
-          required: true,
           type: 'string',
           title: 'Media',
           enum: ['none', 'video', 'audio'],
-          options: {
-            enum_titles: ['None (Captions/Comments Only)', 'Video', 'Audio Only']
-          },
+          'x-enumTitles': ['None (Captions/Comments Only)', 'Video', 'Audio Only'],
           default: 'none'
         },
         includeCaptions: {
-          required: true,
           type: 'boolean',
           title: 'Captions',
-          format: 'checkbox',
+          'x-format': 'checkbox',
           default: false
         },
         includeComments: {
-          required: true,
           type: 'boolean',
           title: 'Comments',
-          format: 'checkbox',
+          'x-format': 'checkbox',
           default: false
         },
         minLikes: {
-          required: true,
           type: 'integer',
           title: 'Minimum Likes (comments)',
           minimum: 0,
           default: 0
         },
         minTextLength: {
-          required: true,
           type: 'integer',
           title: 'Minimum Text Length (comments)',
           minimum: 0,
           default: 0
         },
         cookiesFromBrowser: {
-          required: true,
           type: 'string',
           title: 'Cookies From Browser (fixes "Sign in to confirm you\'re not a bot")',
           enum: ['none', 'firefox', 'chrome', 'safari', 'edge', 'brave'],
-          options: {
-            enum_titles: ['None', 'Firefox', 'Chrome', 'Safari', 'Edge', 'Brave']
-          },
+          'x-enumTitles': ['None', 'Firefox', 'Chrome', 'Safari', 'Edge', 'Brave'],
           default: 'none'
         }
-      }
+      },
+      required: ['url', 'media', 'includeCaptions', 'includeComments', 'minLikes', 'minTextLength', 'cookiesFromBrowser']
     }
   })
 
-  editor.on('change', () => {
-    window.storage.saveLastConfig(editor.getValue())
+  jedisonForm.on('change', () => {
+    window.storage.saveLastConfig(jedisonForm.getValue())
   })
 
   window.api.on('command', (event, message) => {
@@ -207,13 +194,13 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   download.addEventListener('click', () => {
-    const errors = editor.validate()
+    const errors = jedisonForm.getErrors()
     if (errors.length) {
       alert('Please check the form data')
     } else {
       download.disabled = true
       abort.disabled = false
-      window.api.send('download', editor.getValue())
+      window.api.send('download', jedisonForm.getValue())
     }
   })
 

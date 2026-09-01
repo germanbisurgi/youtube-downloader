@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+/* Maps our brand tokens onto Bootstrap's built-in [data-bs-theme=dark] variables — identical
+   to mcp-whisper's theme.css (same technique, same values, same n3-stack source). Keeping
+   these two files byte-for-byte the same is the point: same Bootstrap major version + same
+   variable overrides = the same rendered components, not just the same colors. */
+html[data-bs-theme="dark"] {
+  --bs-body-font-family: var(--font-sans);
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--color-text);
+  --bs-emphasis-color: var(--color-text);
+  --bs-heading-color: var(--color-text);
+  --bs-secondary-color: var(--color-text-muted);
+  --bs-tertiary-bg: var(--color-surface);
+  --bs-border-color: var(--color-border);
+  --bs-border-color-translucent: var(--color-border);
+
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: var(--color-primary-rgb);
+  --bs-primary-text-emphasis: var(--color-primary);
+  --bs-primary-bg-subtle: rgba(var(--color-primary-rgb), .12);
+  --bs-link-color: var(--color-primary);
+  --bs-link-color-rgb: var(--color-primary-rgb);
+  --bs-link-hover-color: var(--color-primary-hover);
+  --bs-focus-ring-color: rgba(var(--color-primary-rgb), .5);
+
+  --bs-card-bg: var(--color-surface);
+  --bs-card-border-color: var(--color-border);
+  --bs-card-border-radius: var(--radius-lg);
+
+  --bs-navbar-color: var(--color-text-muted);
+  --bs-navbar-hover-color: var(--color-text);
+  --bs-navbar-active-color: var(--color-primary);
+  --bs-navbar-brand-color: var(--color-text);
+
+  --bs-border-radius: var(--radius-md);
+  --bs-border-radius-sm: var(--radius-sm);
+  --bs-border-radius-lg: var(--radius-lg);
+  --bs-border-radius-xl: var(--radius-xl);
+}
+
+/* --bs-btn-* vars are baked in at Bootstrap's Sass-build time, so overriding --bs-primary above doesn't reach them — needs its own override. */
+.btn-primary {
+  --bs-btn-color: var(--color-bg);
+  --bs-btn-bg: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+  --bs-btn-hover-color: var(--color-bg);
+  --bs-btn-hover-bg: var(--color-primary-hover);
+  --bs-btn-hover-border-color: var(--color-primary-hover);
+  --bs-btn-focus-shadow-rgb: var(--color-primary-rgb);
+  --bs-btn-active-color: var(--color-bg);
+  --bs-btn-active-bg: var(--color-primary-hover);
+  --bs-btn-active-border-color: var(--color-primary-hover);
+  --bs-btn-disabled-color: var(--color-bg);
+  --bs-btn-disabled-bg: var(--color-primary);
+  --bs-btn-disabled-border-color: var(--color-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+  --bs-btn-hover-color: var(--color-bg);
+  --bs-btn-hover-bg: var(--color-primary);
+  --bs-btn-hover-border-color: var(--color-primary);
+  --bs-btn-focus-shadow-rgb: var(--color-primary-rgb);
+  --bs-btn-active-color: var(--color-bg);
+  --bs-btn-active-bg: var(--color-primary);
+  --bs-btn-active-border-color: var(--color-primary);
+  --bs-btn-disabled-color: var(--color-primary);
+  --bs-btn-disabled-border-color: var(--color-primary);
+}

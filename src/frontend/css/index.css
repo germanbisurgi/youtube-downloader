@@ -1,6 +1,4 @@
-@import "reset.css";
-@import "fonts.css";
 @import "bootstrap.min.css";
 @import "variables.css";
-@import "fontawesome.css";
-@import "components.css";
+@import "theme.css";
+@import "bootstrap-icons.css";
