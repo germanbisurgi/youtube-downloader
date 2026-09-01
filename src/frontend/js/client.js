@@ -16,6 +16,11 @@ window.addEventListener('DOMContentLoaded', () => {
     download.disabled = !allInstalled || !abort.disabled
   }
 
+  // dependencies.install() writes both binaries through one shared scratch dir
+  // (binDir/.tmp) and wipes it at the start of every install — running two installs
+  // at once would let the second one delete the first one's in-flight download.
+  const anyDependencyInstalling = () => Object.values(depsState).some((status) => status && status.installing)
+
   const renderDependency = (name, status) => {
     const row = document.querySelector(`[data-dependency="${name}"]`)
     const badge = row.querySelector('[data-role="badge"]')
@@ -34,7 +39,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     spinner.classList.add('d-none')
-    button.disabled = false
+    button.disabled = anyDependencyInstalling()
 
     if (!status.installed) {
       badge.classList.add('badge-danger')
@@ -48,6 +53,8 @@ window.addEventListener('DOMContentLoaded', () => {
       badge.classList.add('badge-success')
       badge.textContent = status.version ? `installed v${status.version}` : 'installed (checking version...)'
       label.textContent = 'Install'
+      // already installed and no update known — nothing for a click to do
+      button.disabled = true
     }
   }
 
@@ -77,13 +84,18 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const renderAllDependencies = () => {
+    Object.keys(depsState).forEach((name) => renderDependency(name, depsState[name]))
+  }
+
   dependencyRows.forEach((row) => {
     const name = row.dataset.dependency
     const button = row.querySelector('[data-role="install-btn"]')
 
     button.addEventListener('click', async () => {
       depsState[name] = { ...depsState[name], installing: true, progressText: 'installing...' }
-      renderDependency(name, depsState[name])
+      // re-render every row, not just this one — the sibling's button needs to disable too
+      renderAllDependencies()
 
       try {
         await window.api.invoke('dependencies:install', { name })
@@ -99,7 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
   window.api.on('dependencies:progress', (event, { name, phase, percent }) => {
     const progressText = percent === null || percent === undefined ? `${phase}...` : `${phase}... ${percent}%`
     depsState[name] = { ...depsState[name], installing: true, progressText }
-    renderDependency(name, depsState[name])
+    renderAllDependencies()
   })
 
   refreshStatus()

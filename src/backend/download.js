@@ -22,6 +22,16 @@ const buildArgs = (config, { ffmpegPath }) => {
   // enables solving YouTube's "n" signature challenge when a system Node.js is available —
   // harmless no-op otherwise (yt-dlp just falls back to its prior behavior, same warning as before)
   args.push('--js-runtimes', 'node')
+  // spaces out extraction requests (webpage/player-config/API calls) and, separately, subtitle
+  // downloads — YouTube's caption endpoint in particular has been observed 429-ing a request
+  // fired right after those extraction calls with no built-in yt-dlp retry for that error class.
+  args.push('--sleep-requests', '1')
+  args.push('--sleep-subtitles', '1')
+  // without this, a subtitle-only failure (e.g. the 429 above) aborts the whole run before
+  // yt-dlp even attempts the actual video/audio — --ignore-errors lets that still happen.
+  // Tradeoff: yt-dlp's exit code becomes a weaker success signal, since it now also swallows
+  // other per-item failures instead of surfacing them as a nonzero exit.
+  args.push('--ignore-errors')
 
   if (config.cookiesFromBrowser && config.cookiesFromBrowser !== 'none') {
     // works around YouTube's "Sign in to confirm you're not a bot" bot-check by reusing the
