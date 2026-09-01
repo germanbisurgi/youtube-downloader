@@ -1,15 +1,54 @@
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { execFile } = require('child_process')
 const commandante = require('./commandante')
 const dependencies = require('./dependencies')
 const comments = require('./comments')
 const captions = require('./captions')
 
+// yt-dlp's own metadata extraction (webpage/player-config only, no subtitle content fetch —
+// doesn't touch the caption-serving endpoint that's been observed rate-limiting subtitle
+// downloads) — used to find out which of the two known-duplicate English auto-caption tags
+// ("en" translated vs "en-orig" original-language transcript) a video actually has, so the
+// real download requests only that one instead of both and discarding whichever it doesn't
+// need (captions.js used to dedupe this after the fact; this avoids fetching the extra one
+// at all). Falls back to the old broad pattern on any lookup failure, so a captions request
+// never silently comes back empty just because this pre-flight check itself failed.
+const CAPTION_LOOKUP_TIMEOUT = 30000
+const FALLBACK_SUB_LANGS = 'en$,en-orig$,-live_chat'
+
+const resolveCaptionLang = (ytdlpPath, config) => {
+  return new Promise((resolve) => {
+    const args = ['--skip-download', '--no-warnings', '-j']
+    if (config.cookiesFromBrowser && config.cookiesFromBrowser !== 'none') {
+      args.push('--cookies-from-browser', config.cookiesFromBrowser)
+    }
+    args.push(config.url)
+
+    execFile(ytdlpPath, args, { timeout: CAPTION_LOOKUP_TIMEOUT, maxBuffer: 1024 * 1024 * 20 }, (error, stdout) => {
+      if (error) {
+        resolve({ subLangs: FALLBACK_SUB_LANGS, available: true })
+        return
+      }
+      try {
+        const info = JSON.parse(stdout)
+        const hasEn = !!((info.subtitles && info.subtitles.en) || (info.automatic_captions && info.automatic_captions.en))
+        const hasEnOrig = !!((info.subtitles && info.subtitles['en-orig']) || (info.automatic_captions && info.automatic_captions['en-orig']))
+        if (hasEn) resolve({ subLangs: 'en$', available: true })
+        else if (hasEnOrig) resolve({ subLangs: 'en-orig$', available: true })
+        else resolve({ subLangs: null, available: false })
+      } catch (parseError) {
+        resolve({ subLangs: FALLBACK_SUB_LANGS, available: true })
+      }
+    })
+  })
+}
+
 // Builds the yt-dlp argv (everything except the trailing URL) from a form config, plus
 // whatever scratch-dir/threshold state the exit-time cleanup (see cleanup() below) needs.
 // Shared by the Electron IPC handler and the MCP tool so the flag logic exists in one place.
-const buildArgs = (config, { ffmpegPath }) => {
+const buildArgs = async (config, { ffmpegPath, ytdlpPath }) => {
   const args = []
   let captionsTmpDir = null
   let commentsTmpDir = null
@@ -25,8 +64,8 @@ const buildArgs = (config, { ffmpegPath }) => {
   // spaces out extraction requests (webpage/player-config/API calls) and, separately, subtitle
   // downloads — YouTube's caption endpoint in particular has been observed 429-ing a request
   // fired right after those extraction calls with no built-in yt-dlp retry for that error class.
-  args.push('--sleep-requests', '1')
-  args.push('--sleep-subtitles', '1')
+  args.push('--sleep-requests', '3')
+  args.push('--sleep-subtitles', '3')
   // without this, a subtitle-only failure (e.g. the 429 above) aborts the whole run before
   // yt-dlp even attempts the actual video/audio — --ignore-errors lets that still happen.
   // Tradeoff: yt-dlp's exit code becomes a weaker success signal, since it now also swallows
@@ -52,20 +91,23 @@ const buildArgs = (config, { ffmpegPath }) => {
     args.push('--skip-download')
   }
 
+  let captionsSkipped = false
   if (config.includeCaptions) {
-    // auto-captions repeat text across cues, and yt-dlp may fetch more than one English
-    // track for the same video — writing to a scratch dir and cleaning up in cleanup()
-    // below avoids leaving that raw duplication in the output folder.
-    captionsTmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-downloader-captions-'))
-    args.push('--write-subs')
-    args.push('--write-auto-subs')
-    // "en.*" is matched as regex by yt-dlp, so "." (any char) + "*" (repeat) actually matches
-    // "en" followed by ANYTHING — pulling in every auto-translated "en-<lang>" track a video
-    // offers (en-ar, en-zh, ...), which can be dozens and triggers YouTube rate-limiting.
-    // Anchoring with "$" restricts it to exactly "en" or "en-orig".
-    args.push('--sub-langs', 'en$,en-orig$,-live_chat')
-    args.push('--convert-subs', 'srt')
-    args.push('--output', 'subtitle:' + captionsTmpDir + '/%(id)s.%(ext)s')
+    const captionInfo = await resolveCaptionLang(ytdlpPath, config)
+    if (!captionInfo.available) {
+      // neither English tag exists for this video — skip the subtitle flags entirely rather
+      // than issue a request guaranteed to come back empty
+      captionsSkipped = true
+    } else {
+      // auto-captions repeat text across cues — writing to a scratch dir and cleaning up in
+      // cleanup() below avoids leaving that raw duplication in the output folder.
+      captionsTmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-downloader-captions-'))
+      args.push('--write-subs')
+      args.push('--write-auto-subs')
+      args.push('--sub-langs', captionInfo.subLangs)
+      args.push('--convert-subs', 'srt')
+      args.push('--output', 'subtitle:' + captionsTmpDir + '/%(id)s.%(ext)s')
+    }
   }
 
   if (config.includeComments) {
@@ -87,7 +129,7 @@ const buildArgs = (config, { ffmpegPath }) => {
     }
   }
 
-  return { args, captionsTmpDir, commentsTmpDir, commentsMinLikes, commentsMinTextLength }
+  return { args, captionsTmpDir, captionsSkipped, commentsTmpDir, commentsMinLikes, commentsMinTextLength }
 }
 
 // Runs after the yt-dlp process exits: reduces the raw comments/captions scratch output
@@ -121,7 +163,7 @@ const cleanup = (state, outputDir, onWarning) => {
 // Kicks off a download for the given form config, streaming logs via onLog and signalling
 // completion via onExit. Used identically by the Electron `download` IPC handler and the
 // MCP `download_media` tool — neither one duplicates the yt-dlp flag/cleanup logic.
-const run = (config, outputDir, { onLog, onExit }) => {
+const run = async (config, outputDir, { onLog, onExit }) => {
   if (!dependencies.isInstalled('yt-dlp') || !dependencies.isInstalled('ffmpeg')) {
     onLog({ type: 'output', message: 'Error: yt-dlp/ffmpeg not installed. Install them from the Dependencies panel first.' })
     onExit()
@@ -130,7 +172,15 @@ const run = (config, outputDir, { onLog, onExit }) => {
 
   const ffmpegPath = dependencies.getBinaryPath('ffmpeg')
   const ytdlpPath = dependencies.getBinaryPath('yt-dlp')
-  const state = buildArgs(config, { ffmpegPath })
+
+  if (config.includeCaptions) {
+    onLog({ type: 'output', message: 'Checking available captions...' })
+  }
+
+  const state = await buildArgs(config, { ffmpegPath, ytdlpPath })
+  if (state.captionsSkipped) {
+    onLog({ type: 'output', message: 'No English captions available for this video — skipping captions.' })
+  }
   const args = [...state.args, config.url]
 
   commandante.onLogs = onLog
