@@ -47,8 +47,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "electron": "^16.0.6",
-    "electron-builder": "^26.0.12",
+    "electron": "^44.1.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^8.5.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
