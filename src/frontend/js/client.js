@@ -46,27 +46,35 @@ window.addEventListener('DOMContentLoaded', () => {
       label.textContent = 'Update'
     } else {
       badge.classList.add('badge-success')
-      badge.textContent = `installed v${status.version}`
+      badge.textContent = status.version ? `installed v${status.version}` : 'installed (checking version...)'
       label.textContent = 'Install'
     }
   }
 
   const refreshStatus = async () => {
-    const status = await window.api.invoke('dependencies:status')
-
-    for (const name of Object.keys(status)) {
-      depsState[name] = status[name]
-    }
-
-    for (const name of Object.keys(status)) {
-      if (status[name].installed) {
-        const update = await window.api.invoke('dependencies:check-update', { name })
-        depsState[name] = { ...depsState[name], ...update }
-      }
+    // fast path (just a file-existence check): unlocks Download immediately, without
+    // waiting on the slow version lookup below — yt-dlp's standalone binary can take
+    // several seconds just to report `--version`
+    const installedFlags = await window.api.invoke('dependencies:installed')
+    for (const name of Object.keys(installedFlags)) {
+      depsState[name] = { ...depsState[name], ...installedFlags[name] }
       renderDependency(name, depsState[name])
     }
-
     updateDownloadButtonState()
+
+    // slow path: version + update info are purely informational and never gate Download
+    const status = await window.api.invoke('dependencies:status')
+    for (const name of Object.keys(status)) {
+      depsState[name] = { ...depsState[name], ...status[name] }
+      renderDependency(name, depsState[name])
+
+      if (status[name].installed) {
+        window.api.invoke('dependencies:check-update', { name, installedVersion: status[name].version }).then((update) => {
+          depsState[name] = { ...depsState[name], ...update }
+          renderDependency(name, depsState[name])
+        })
+      }
+    }
   }
 
   dependencyRows.forEach((row) => {
@@ -103,6 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
     show_opt_in: true,
     show_errors: 'always',
     theme: 'bootstrap4',
+    startval: window.storage.loadLastConfig() || undefined,
     schema: {
       required: true,
       type: 'object',
@@ -115,12 +124,15 @@ window.addEventListener('DOMContentLoaded', () => {
           minLength: 1,
           default: 'https://www.youtube.com/watch?v=wpJYQf5uJ4w&list=PLUhYAiEwD-whqQ2Ak4wBJxO6WnS15l8AN'
         },
-        extractAudio: {
+        media: {
           required: true,
-          type: 'boolean',
-          title: 'Audio Only',
-          format: 'checkbox',
-          default: false
+          type: 'string',
+          title: 'Media',
+          enum: ['none', 'video', 'audio'],
+          options: {
+            enum_titles: ['None (Captions/Comments Only)', 'Video', 'Audio Only']
+          },
+          default: 'none'
         },
         includeCaptions: {
           required: true,
@@ -149,9 +161,23 @@ window.addEventListener('DOMContentLoaded', () => {
           title: 'Minimum Text Length (comments)',
           minimum: 0,
           default: 0
+        },
+        cookiesFromBrowser: {
+          required: true,
+          type: 'string',
+          title: 'Cookies From Browser (fixes "Sign in to confirm you\'re not a bot")',
+          enum: ['none', 'firefox', 'chrome', 'safari', 'edge', 'brave'],
+          options: {
+            enum_titles: ['None', 'Firefox', 'Chrome', 'Safari', 'Edge', 'Brave']
+          },
+          default: 'none'
         }
       }
     }
+  })
+
+  editor.on('change', () => {
+    window.storage.saveLastConfig(editor.getValue())
   })
 
   window.api.on('command', (event, message) => {

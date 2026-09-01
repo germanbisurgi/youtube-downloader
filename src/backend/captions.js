@@ -1,28 +1,25 @@
 const fs = require('fs')
 const path = require('path')
 
+// A cue's index/timestamp lines are matched by content rather than assumed to always be
+// the block's first two lines — some converted .srt files insert stray blank lines that
+// shift that position, which used to let a timestamp line slip through as caption text.
+const isCueIndexLine = (line) => /^\d+$/.test(line)
+const isTimestampLine = (line) => /^\d{2}:\d{2}:\d{2}[,.]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}[,.]\d{3}/.test(line)
+
 // YouTube's auto-generated captions "roll up": each cue repeats the previous cue's text
 // plus one new line, so naively reading the .srt is full of duplicated lines. Dropping any
 // line identical to the last kept one reconstructs the original flowing transcript.
-const parseSrtBlocks = (content) => {
-  return content
-    .split(/\r?\n\r?\n/)
-    .map((block) => block.split(/\r?\n/).slice(2))
-}
-
 const writeCleanCaptions = (srtPath, outputPath) => {
   const content = fs.readFileSync(srtPath, 'utf8')
-  const blocks = parseSrtBlocks(content)
 
   const lines = []
   let lastLine = null
-  for (const blockLines of blocks) {
-    for (const rawLine of blockLines) {
-      const line = rawLine.trim()
-      if (!line || line === lastLine) continue
-      lines.push(line)
-      lastLine = line
-    }
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || isCueIndexLine(line) || isTimestampLine(line) || line === lastLine) continue
+    lines.push(line)
+    lastLine = line
   }
 
   fs.writeFileSync(outputPath, lines.join(' ') + '\n')
@@ -42,7 +39,7 @@ const writeCleanCaptionsFromDir = (subsDir, outputDir) => {
 
   for (const [id, candidates] of Object.entries(byId)) {
     const chosen = candidates.find((file) => file === id + '.en.srt') || candidates[0]
-    writeCleanCaptions(path.join(subsDir, chosen), path.join(outputDir, id + '.captions.txt'))
+    writeCleanCaptions(path.join(subsDir, chosen), path.join(outputDir, id + '.captions.md'))
   }
 }
 

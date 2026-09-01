@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "yarn electron",
     "electron": "electron ./src/backend/index.js",
+    "mcp": "node ./src/mcp/server.js",
     "build-all": "electron-builder build -mwl",
     "build-linux": "electron-builder build -l",
     "build-mac": "electron-builder build -m",
@@ -40,8 +41,10 @@
   },
   "dependencies": {
     "@json-editor/json-editor": "^2.6.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "deepmerge": "^4.2.2",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "electron": "^16.0.6",

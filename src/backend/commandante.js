@@ -14,11 +14,24 @@ Comandante.prototype.log = function (type, message) {
   })
 }
 
-Comandante.prototype.command = function (command, options = {}) {
-  const defaultOptions = { env: process.env.PATH }
+// Wraps an arg in quotes for the human-readable prompt log only, if it contains
+// whitespace — purely cosmetic, has no bearing on how the child process is spawned.
+const displayArg = (arg) => (/\s/.test(arg) ? `"${arg}"` : arg)
+
+Comandante.prototype.command = function (binary, args = [], options = {}) {
+  // no `env` override here — omitting it lets spawn() inherit the full parent
+  // environment (HOME, PATH, etc.) by default. A previous version set
+  // `env: process.env.PATH` (a string, not an object), which corrupted the
+  // child's environment: HOME came out empty, breaking anything that depends
+  // on it (nvm-managed `node` on PATH, shell rc files, ...).
+  const defaultOptions = {}
   const mergedOptions = deepmerge(defaultOptions, options)
 
-  this.process = spawn('bash', ['-c', command], mergedOptions)
+  // spawn(binary, argsArray) — no shell involved, so args (e.g. a URL) are passed
+  // to the child verbatim and can't be interpreted as shell syntax. Previously this
+  // ran `spawn('bash', ['-c', command])` with a hand-built, only partially quoted
+  // command string, which was vulnerable to shell injection via any unescaped arg.
+  this.process = spawn(binary, args, mergedOptions)
 
   this.process.stdout.on('data', (data) => {
     this.log('output', `${data}`)
@@ -41,7 +54,7 @@ Comandante.prototype.command = function (command, options = {}) {
 
   const user = os.userInfo().username
   const folder = process.cwd().split('/').slice(-1)[0]
-  this.log('prompt', user + ':' + folder + ' ' + command)
+  this.log('prompt', user + ':' + folder + ' ' + [binary, ...args].map(displayArg).join(' '))
 }
 
 Comandante.prototype.kill = function () {

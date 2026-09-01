@@ -20,6 +20,8 @@ yarn electron
 
 On first launch, click **Install** next to `yt-dlp` and `ffmpeg` in the Dependencies panel at the top of the window — the Download button stays disabled until both finish installing.
 
+If a download fails with `Sign in to confirm you're not a bot`, set **Cookies From Browser** in the form to a browser you're logged into YouTube with (Firefox works out of the box; Chrome/Safari may prompt for Keychain or Full Disk Access to decrypt their cookie store, since macOS restricts reading them directly).
+
 ## Building the Application
 
 This project utilizes [electron-builder](https://www.electron.build/) to package and create distributable versions of the Electron app for macOS, Windows, and Linux.
@@ -55,3 +57,22 @@ This app does not bundle `yt-dlp` or `ffmpeg`. Instead, a "Dependencies" panel i
 ### The `dist` Folder
 
 This directory is where electron-builder stores the packaged and compiled versions of the application for distribution.
+
+### MCP server
+
+Besides the GUI, `src/mcp/server.js` exposes the same download functionality as an [MCP](https://modelcontextprotocol.io) server, so an MCP client (e.g. Claude Desktop or Claude Code) can trigger a download directly. It shares the same output folder and yt-dlp/ffmpeg install as the GUI app — install the dependencies from the GUI's Dependencies panel first (the MCP server itself only checks for them, via `check_dependencies`; it doesn't install them).
+
+Run it with `yarn mcp`, or point an MCP client's config at it directly, e.g. for Claude Desktop/Code (`claude_desktop_config.json` / `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "youtube-downloader": {
+      "command": "node",
+      "args": ["/absolute/path/to/youtube-downloader/src/mcp/server.js"]
+    }
+  }
+}
+```
+
+Tools: `check_dependencies` (read-only status check) and `download_media` (downloads video/audio, optionally captions/comments; blocks until yt-dlp exits and returns its log).

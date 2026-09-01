@@ -11,9 +11,14 @@ const reduceComment = (comment) => ({
 
 const writeReducedComments = (infoJsonPath, outputPath, minLikes = 0, minTextLength = 0) => {
   const data = JSON.parse(fs.readFileSync(infoJsonPath, 'utf8'))
+  const likesFilterActive = minLikes > 0
   const comments = (data.comments || [])
     .map(reduceComment)
-    .filter((comment) => comment.like_count >= minLikes && comment.text.length >= minTextLength)
+    .filter((comment) => {
+      if (comment.like_count < minLikes) return false
+      // a comment that clears an active minLikes threshold is exempt from minTextLength
+      return likesFilterActive || comment.text.length >= minTextLength
+    })
     .sort((a, b) => b.like_count - a.like_count)
   fs.writeFileSync(outputPath, JSON.stringify(comments, null, 2))
 }

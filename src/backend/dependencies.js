@@ -2,7 +2,6 @@ const fs = require('fs')
 const path = require('path')
 const https = require('https')
 const { execFile } = require('child_process')
-const { app } = require('electron')
 const utils = require('./utils')
 
 const GITHUB_API_HEADERS = { 'User-Agent': 'youtube-downloader' }
@@ -12,7 +11,10 @@ const GITHUB_API_HEADERS = { 'User-Agent': 'youtube-downloader' }
 // here would misreport a perfectly installed binary as unversioned/broken.
 const VERSION_CHECK_TIMEOUT = 20000
 
-const getBinDir = () => path.join(app.getPath('userData'), 'bin')
+// No dependency on the `electron` module here (see utils.getUserDataDir) — this file
+// needs to work identically from the Electron main process and from the plain-Node MCP
+// server, resolving to the same directory so both share one yt-dlp/ffmpeg install.
+const getBinDir = () => path.join(utils.getUserDataDir('youtube-downloader'), 'bin')
 
 const getBinaryPath = (name) => {
   const ext = utils.isWin() ? '.exe' : ''
@@ -20,6 +22,16 @@ const getBinaryPath = (name) => {
 }
 
 const isInstalled = (name) => fs.existsSync(getBinaryPath(name))
+
+// Fast, version-free check (just a file-existence test) — used to unlock the Download
+// button immediately, without waiting on the slow version lookup below.
+const getInstalledFlags = () => {
+  const flags = {}
+  for (const name of ['yt-dlp', 'ffmpeg']) {
+    flags[name] = { installed: isInstalled(name), path: getBinaryPath(name) }
+  }
+  return flags
+}
 
 const getInstalledVersion = (name) => {
   return new Promise((resolve) => {
@@ -214,10 +226,11 @@ const fetchText = (url) => {
   })
 }
 
-const checkYtdlpUpdate = async () => {
+// installedVersion is passed in (rather than re-derived here) because getInstalledVersion
+// is what makes these checks slow — the caller already paid that cost once for getStatus().
+const checkYtdlpUpdate = async (installedVersion) => {
   const release = await fetchJson('https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest')
   const latestVersion = release.tag_name
-  const installedVersion = await getInstalledVersion('yt-dlp')
   const updateAvailable = !!latestVersion && !!installedVersion && latestVersion !== installedVersion
   return { updateAvailable, latestVersion }
 }
@@ -225,7 +238,7 @@ const checkYtdlpUpdate = async () => {
 // ffmpeg's own `-version` output embeds extra build metadata (e.g. "6.1-full_build-www.gyan.dev")
 // that never matches a plain upstream version string exactly, so this uses a substring check and
 // only ever reports "no update" (never a false positive) when either side can't be determined.
-const checkFfmpegUpdate = async () => {
+const checkFfmpegUpdate = async (installedVersion) => {
   try {
     let latestVersion = null
 
@@ -238,7 +251,6 @@ const checkFfmpegUpdate = async () => {
       return { updateAvailable: false, latestVersion: null }
     }
 
-    const installedVersion = await getInstalledVersion('ffmpeg')
     const updateAvailable = !!latestVersion && !!installedVersion && !installedVersion.includes(latestVersion)
     return { updateAvailable, latestVersion }
   } catch (error) {
@@ -246,12 +258,13 @@ const checkFfmpegUpdate = async () => {
   }
 }
 
-const checkForUpdate = (name) => (name === 'ffmpeg' ? checkFfmpegUpdate() : checkYtdlpUpdate())
+const checkForUpdate = (name, installedVersion) => (name === 'ffmpeg' ? checkFfmpegUpdate(installedVersion) : checkYtdlpUpdate(installedVersion))
 
 module.exports = {
   getBinDir,
   getBinaryPath,
   isInstalled,
+  getInstalledFlags,
   getInstalledVersion,
   getStatus,
   getDownloadUrl,
