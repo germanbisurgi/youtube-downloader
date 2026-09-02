@@ -134,13 +134,21 @@ const buildArgs = async (config, { ffmpegPath, ytdlpPath }) => {
 
 // Runs after the yt-dlp process exits: reduces the raw comments/captions scratch output
 // into the real output folder, then removes the scratch dirs either way (success or failure).
+// Returns the final paths written, so run() can hand them back to its caller (the MCP
+// download_media tool needs these — it has no other way to know where captions/comments
+// actually ended up, since they're not part of yt-dlp's own [download]/[Merger] log lines).
 const cleanup = (state, outputDir, onWarning) => {
+  const commentPaths = []
+  let captionPaths = []
+
   if (state.commentsTmpDir) {
     try {
       const files = fs.readdirSync(state.commentsTmpDir).filter((file) => file.endsWith('.info.json'))
       for (const file of files) {
         const id = file.replace(/\.info\.json$/, '')
-        comments.writeReducedComments(path.join(state.commentsTmpDir, file), path.join(outputDir, id + '.comments.json'), state.commentsMinLikes, state.commentsMinTextLength)
+        const outputPath = path.join(outputDir, id + '.comments.json')
+        comments.writeReducedComments(path.join(state.commentsTmpDir, file), outputPath, state.commentsMinLikes, state.commentsMinTextLength)
+        commentPaths.push(outputPath)
       }
     } catch (error) {
       onWarning('Warning: failed to extract comments: ' + error.message)
@@ -151,28 +159,26 @@ const cleanup = (state, outputDir, onWarning) => {
 
   if (state.captionsTmpDir) {
     try {
-      captions.writeCleanCaptionsFromDir(state.captionsTmpDir, outputDir)
+      captionPaths = captions.writeCleanCaptionsFromDir(state.captionsTmpDir, outputDir)
     } catch (error) {
       onWarning('Warning: failed to extract captions: ' + error.message)
     } finally {
       fs.rmSync(state.captionsTmpDir, { recursive: true, force: true })
     }
   }
+
+  return { captionPaths, commentPaths }
 }
 
-// Kicks off a download for the given form config, streaming logs via onLog and signalling
-// completion via onExit. Used identically by the Electron `download` IPC handler and the
-// MCP `download_media` tool — neither one duplicates the yt-dlp flag/cleanup logic.
-const run = async (config, outputDir, { onLog, onExit }) => {
-  if (!dependencies.isInstalled('yt-dlp') || !dependencies.isInstalled('ffmpeg')) {
-    onLog({ type: 'output', message: 'Error: yt-dlp/ffmpeg not installed. Install them from the Dependencies panel first.' })
-    onExit()
-    return
-  }
+// yt-dlp's own message when YouTube demands bot verification — used to detect the failure
+// so run() can retry once with browser cookies instead of the caller having to notice the
+// log text and retry manually with cookiesFromBrowser set.
+const BOT_CHECK_MARKER = 'Sign in to confirm you'
 
-  const ffmpegPath = dependencies.getBinaryPath('ffmpeg')
-  const ytdlpPath = dependencies.getBinaryPath('yt-dlp')
-
+// Runs one yt-dlp attempt end to end (build args, spawn, cleanup) and resolves true if the
+// bot-check marker showed up in its output. Split out of run() so run() can retry once with
+// cookies if the first, cookie-less attempt hits YouTube's bot check.
+const runOnce = async (config, outputDir, { ffmpegPath, ytdlpPath }, onLog) => {
   if (config.includeCaptions) {
     onLog({ type: 'output', message: 'Checking available captions...' })
   }
@@ -183,13 +189,48 @@ const run = async (config, outputDir, { onLog, onExit }) => {
   }
   const args = [...state.args, config.url]
 
-  commandante.onLogs = onLog
-  commandante.onExit = () => {
-    cleanup(state, outputDir, (message) => onLog({ type: 'output', message }))
-    onExit()
+  return new Promise((resolve) => {
+    let sawBotCheck = false
+    commandante.onLogs = (log) => {
+      if (log.message.includes(BOT_CHECK_MARKER)) sawBotCheck = true
+      onLog(log)
+    }
+    commandante.onExit = () => {
+      const paths = cleanup(state, outputDir, (message) => onLog({ type: 'output', message }))
+      resolve({ sawBotCheck, ...paths })
+    }
+
+    commandante.command(ytdlpPath, args, { cwd: outputDir })
+  })
+}
+
+// Kicks off a download for the given form config, streaming logs via onLog and signalling
+// completion via onExit(paths). Used identically by the Electron `download` IPC handler and
+// the MCP `download_media` tool — neither one duplicates the yt-dlp flag/cleanup logic.
+const run = async (config, outputDir, { onLog, onExit }) => {
+  if (!dependencies.isInstalled('yt-dlp') || !dependencies.isInstalled('ffmpeg')) {
+    onLog({ type: 'output', message: 'Error: yt-dlp/ffmpeg not installed. Install them from the Dependencies panel first.' })
+    onExit({ captionPaths: [], commentPaths: [] })
+    return
   }
 
-  commandante.command(ytdlpPath, args, { cwd: outputDir })
+  const ffmpegPath = dependencies.getBinaryPath('ffmpeg')
+  const ytdlpPath = dependencies.getBinaryPath('yt-dlp')
+  const paths = { ffmpegPath, ytdlpPath }
+
+  const first = await runOnce(config, outputDir, paths, onLog)
+  let { captionPaths, commentPaths } = first
+
+  // Only retry when the caller didn't already ask for cookies — if they did and still hit
+  // the bot check, retrying with the same cookies would just fail the same way again.
+  if (first.sawBotCheck && (!config.cookiesFromBrowser || config.cookiesFromBrowser === 'none')) {
+    onLog({ type: 'output', message: 'YouTube requested bot verification — retrying once with Firefox cookies (--cookies-from-browser firefox)...' })
+    const retry = await runOnce({ ...config, cookiesFromBrowser: 'firefox' }, outputDir, paths, onLog)
+    captionPaths = retry.captionPaths
+    commentPaths = retry.commentPaths
+  }
+
+  onExit({ captionPaths, commentPaths })
 }
 
 module.exports = { buildArgs, cleanup, run }

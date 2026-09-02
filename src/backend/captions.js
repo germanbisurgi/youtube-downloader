@@ -28,6 +28,8 @@ const writeCleanCaptions = (srtPath, outputPath) => {
 // yt-dlp can surface more than one English track per video (e.g. a translated "en"
 // alongside the original-language "en-orig" auto-caption) — this picks one per video id
 // so a video doesn't end up with two near-identical caption files.
+// Returns the output path(s) written, so callers (e.g. the MCP download_media tool) can
+// hand the caller a real path instead of it having to guess one from the id/title.
 const writeCleanCaptionsFromDir = (subsDir, outputDir) => {
   const files = fs.readdirSync(subsDir).filter((file) => file.endsWith('.srt'))
   const byId = {}
@@ -37,10 +39,14 @@ const writeCleanCaptionsFromDir = (subsDir, outputDir) => {
     byId[id].push(file)
   }
 
+  const written = []
   for (const [id, candidates] of Object.entries(byId)) {
     const chosen = candidates.find((file) => file === id + '.en.srt') || candidates[0]
-    writeCleanCaptions(path.join(subsDir, chosen), path.join(outputDir, id + '.captions.md'))
+    const outputPath = path.join(outputDir, id + '.captions.md')
+    writeCleanCaptions(path.join(subsDir, chosen), outputPath)
+    written.push(outputPath)
   }
+  return written
 }
 
 module.exports = { writeCleanCaptionsFromDir }
