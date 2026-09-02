@@ -50,7 +50,7 @@ server.registerTool(
   'download_media',
   {
     title: 'Download a YouTube video/playlist',
-    description: 'Downloads video or extracts MP3 audio from a YouTube URL via yt-dlp, saving into ~/youtube-downloader. Requires yt-dlp and ffmpeg to already be installed (see check_dependencies). Blocks until the download finishes and returns JSON with mediaPaths (the downloaded file(s), ready to pass to another tool), captions (path + the transcript text itself, when includeCaptions was set), commentPaths, and the yt-dlp log. If YouTube demands bot verification, automatically retries once with Firefox cookies before giving up.',
+    description: 'Downloads video or extracts MP3 audio from a YouTube URL via yt-dlp, saving into ~/youtube-downloader. Requires yt-dlp and ffmpeg to already be installed (see check_dependencies). Blocks until the download finishes and returns JSON with outputDir and the yt-dlp log, plus mediaPaths (the downloaded file(s), ready to pass to another tool), captions (path + the transcript text itself), and/or commentPaths - each only present when that part of the request actually produced something, so e.g. a captions-only call does not come back cluttered with empty mediaPaths/commentPaths arrays. If YouTube demands bot verification, automatically retries once with Firefox cookies before giving up.',
     inputSchema: {
       url: z.string().describe('YouTube video or playlist URL'),
       media: z.enum(['none', 'video', 'audio']).default('none').describe('"video" downloads the video, "audio" extracts MP3, "none" skips the media file (useful with includeCaptions/includeComments only)'),
@@ -92,7 +92,15 @@ server.registerTool(
       return { path: captionPath, text }
     })
 
-    return { content: [{ type: 'text', text: JSON.stringify({ mediaPaths, captions, commentPaths, outputDir, log: log || '(no output)' }, null, 2) }] }
+    // Only include each of these when it's actually relevant to what was requested - an
+    // agent otherwise has to visually filter out empty mediaPaths/commentPaths arrays on
+    // every captions-only call just to find the one field (captions) it actually wanted.
+    const responseBody = { outputDir, log: log || '(no output)' }
+    if (mediaPaths.length) responseBody.mediaPaths = mediaPaths
+    if (captions.length) responseBody.captions = captions
+    if (commentPaths.length) responseBody.commentPaths = commentPaths
+
+    return { content: [{ type: 'text', text: JSON.stringify(responseBody, null, 2) }] }
   }
 )
 
