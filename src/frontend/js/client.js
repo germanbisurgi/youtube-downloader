@@ -169,9 +169,15 @@ window.addEventListener('DOMContentLoaded', () => {
           enum: ['none', 'firefox', 'chrome', 'safari', 'edge', 'brave'],
           'x-enumTitles': ['None', 'Firefox', 'Chrome', 'Safari', 'Edge', 'Brave'],
           default: 'none'
+        },
+        sleepBetweenRequests: {
+          type: 'boolean',
+          title: 'Slow Down Requests (avoids YouTube 429 errors on big playlists; uncheck for faster downloads)',
+          'x-format': 'checkbox',
+          default: true
         }
       },
-      required: ['url', 'media', 'includeCaptions', 'includeComments', 'minLikes', 'minTextLength', 'cookiesFromBrowser']
+      required: ['url', 'media', 'includeCaptions', 'includeComments', 'minLikes', 'minTextLength', 'cookiesFromBrowser', 'sleepBetweenRequests']
     }
   })
 

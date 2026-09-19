@@ -1,9 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
 
-/* Maps our brand tokens onto Bootstrap's built-in [data-bs-theme=dark] variables — identical
-   to mcp-whisper's theme.css (same technique, same values, same n3-stack source). Keeping
-   these two files byte-for-byte the same is the point: same Bootstrap major version + same
-   variable overrides = the same rendered components, not just the same colors. */
+/* Maps our brand tokens onto Bootstrap's built-in [data-bs-theme=dark] variables — same
+   technique and values as n3-stack's admin-app/src/assets/theme.css. n3-stack inlines the base
+   dark-mode variable set at bare :root because it never sets the data-bs-theme attribute itself;
+   this app always sets data-bs-theme="dark" on <html> (index.html), so Bootstrap's own
+   [data-bs-theme=dark] rule already supplies that base set and only the brand overrides are
+   needed here — scoped to the same attribute selector so they only ever apply on top of it. */
 html[data-bs-theme="dark"] {
   --bs-body-font-family: var(--font-sans);
   --bs-body-bg: var(--color-bg);
@@ -18,11 +20,24 @@ html[data-bs-theme="dark"] {
   --bs-primary: var(--color-primary);
   --bs-primary-rgb: var(--color-primary-rgb);
   --bs-primary-text-emphasis: var(--color-primary);
-  --bs-primary-bg-subtle: rgba(var(--color-primary-rgb), .12);
+  --bs-primary-bg-subtle: var(--color-primary-subtle);
   --bs-link-color: var(--color-primary);
   --bs-link-color-rgb: var(--color-primary-rgb);
   --bs-link-hover-color: var(--color-primary-hover);
   --bs-focus-ring-color: rgba(var(--color-primary-rgb), .5);
+
+  /* Bootstrap's base semantic colors don't change between light/dark theme, so without this
+     they stay stock-saturated (#198754/#0dcaf0/#ffc107/#dc3545) — the loudest colors on the page
+     next to our muted palette. The *-text-emphasis/*-bg-subtle/*-border-subtle variants are
+     already dark-theme-appropriate (Bootstrap's own [data-bs-theme=dark] block) and stay as-is. */
+  --bs-success: var(--color-success);
+  --bs-success-rgb: var(--color-success-rgb);
+  --bs-info: var(--color-info);
+  --bs-info-rgb: var(--color-info-rgb);
+  --bs-warning: var(--color-warning);
+  --bs-warning-rgb: var(--color-warning-rgb);
+  --bs-danger: var(--color-danger);
+  --bs-danger-rgb: var(--color-danger-rgb);
 
   --bs-card-bg: var(--color-surface);
   --bs-card-border-color: var(--color-border);
@@ -68,4 +83,36 @@ html[data-bs-theme="dark"] {
   --bs-btn-active-border-color: var(--color-primary);
   --bs-btn-disabled-color: var(--color-primary);
   --bs-btn-disabled-border-color: var(--color-primary);
+}
+
+/* Same Sass-bake-time issue as .btn-primary/.btn-outline-primary above — kept for parity with
+   n3-stack even though this app has no delete action today. */
+.btn-outline-danger {
+  --bs-btn-color: var(--color-danger);
+  --bs-btn-border-color: var(--color-danger);
+  --bs-btn-hover-color: var(--color-bg);
+  --bs-btn-hover-bg: var(--color-danger);
+  --bs-btn-hover-border-color: var(--color-danger);
+  --bs-btn-focus-shadow-rgb: var(--color-danger-rgb);
+  --bs-btn-active-color: var(--color-bg);
+  --bs-btn-active-bg: var(--color-danger);
+  --bs-btn-active-border-color: var(--color-danger);
+  --bs-btn-disabled-color: var(--color-danger);
+  --bs-btn-disabled-border-color: var(--color-danger);
+}
+
+/* Bootstrap's close-button icon is a hardcoded black SVG (no dark-mode filter) with a default blue focus ring. */
+.btn-close {
+  --bs-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
+  --bs-btn-close-focus-shadow: var(--shadow-focus);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(var(--color-primary-rgb), .35);
+  color: var(--color-text);
 }

@@ -1,24 +1,42 @@
-/* Design tokens, kept the same as n3-stack's admin-app/src/assets/tokens.css and
-   app/app/assets/css/tokens.css — hand-copied here, not imported across projects.
-   Applied via theme.css remapping Bootstrap 5's own runtime CSS variables — identical
-   file to mcp-whisper's theme.css, so both apps render the same. */
+/* Same values as n3-stack's admin-app/src/assets/tokens.css and app/app/assets/css/tokens.css —
+   hand-copied here, not imported across projects. Refreshed 2026-09-19: n3-stack moved its
+   palette on (dark-navy bg + light-blue primary, muted status colors, elevation shadows); this
+   file had drifted to the older dark-gray/Vue-green pair and is now back in sync. */
 :root {
-  --color-bg: #0d1117;
-  --color-surface: #161d26;
-  --color-surface-hover: #1d2733;
-  --color-border: #2a3542;
+  --color-bg: #1e1f21;
+  --color-surface: #27292c;
+  --color-surface-hover: #2f3236;
+  --color-border: #495057;
+  --color-border-subtle: rgba(255, 255, 255, .08);
 
-  --color-text: #f0f3f6;
-  --color-text-muted: #8b98a8;
+  --color-text: #dee2e6;
+  --color-text-muted: #9aa0a6;
 
-  --color-primary: #42b883;
-  --color-primary-hover: #5bd09a;
-  --color-primary-rgb: 66, 184, 131;
+  --color-primary: #95cffd;
+  --color-primary-hover: #aee0ff;
+  --color-primary-rgb: 149, 207, 253;
+  --color-primary-subtle: rgba(var(--color-primary-rgb), .12);
 
-  --radius-sm: .375rem;
-  --radius-md: .625rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  /* Muted to sit alongside --color-primary instead of Bootstrap's stock saturated defaults. */
+  --color-success: #4da375;
+  --color-success-rgb: 77, 163, 117;
+  --color-info: #45a8c4;
+  --color-info-rgb: 69, 168, 196;
+  --color-warning: #d9a441;
+  --color-warning-rgb: 217, 164, 65;
+  --color-danger: #d16572;
+  --color-danger-rgb: 209, 101, 114;
+
+  --radius-sm: .21875rem;
+  --radius-md: .28125rem;
+  --radius-lg: .375rem;
+  --radius-xl: .5rem;
+
+  /* Elevation, not borders — for surfaces that sit above the page instead of just being outlined. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, .4);
+  --shadow-focus: 0 0 0 .25rem rgba(var(--color-primary-rgb), .25);
 
   --space-1: .25rem;
   --space-2: .5rem;

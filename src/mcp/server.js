@@ -58,7 +58,8 @@ server.registerTool(
       includeComments: z.boolean().default(false).describe('Also save top comments as JSON'),
       minLikes: z.number().int().min(0).default(0).describe('Minimum like count for a comment to be kept (only applies when includeComments is true)'),
       minTextLength: z.number().int().min(0).default(0).describe('Minimum character length for a comment to be kept (only applies when includeComments is true)'),
-      cookiesFromBrowser: z.enum(['none', 'firefox', 'chrome', 'safari', 'edge', 'brave']).default('none').describe('Reuse cookies from a locally logged-in browser, to work around YouTube\'s "Sign in to confirm you\'re not a bot" check')
+      cookiesFromBrowser: z.enum(['none', 'firefox', 'chrome', 'safari', 'edge', 'brave']).default('none').describe('Reuse cookies from a locally logged-in browser, to work around YouTube\'s "Sign in to confirm you\'re not a bot" check'),
+      sleepBetweenRequests: z.boolean().default(true).describe('Pace requests with --sleep-requests/--sleep-subtitles to avoid YouTube 429s; set false for faster downloads at higher rate-limit risk')
     }
   },
   async (config) => {

@@ -64,8 +64,12 @@ const buildArgs = async (config, { ffmpegPath, ytdlpPath }) => {
   // spaces out extraction requests (webpage/player-config/API calls) and, separately, subtitle
   // downloads — YouTube's caption endpoint in particular has been observed 429-ing a request
   // fired right after those extraction calls with no built-in yt-dlp retry for that error class.
-  args.push('--sleep-requests', '3')
-  args.push('--sleep-subtitles', '3')
+  // User-toggleable (default on) since this is the main thing slowing a playlist download down —
+  // a large, error-free playlist can be sped up by turning it off at the cost of higher 429 risk.
+  if (config.sleepBetweenRequests !== false) {
+    args.push('--sleep-requests', '3')
+    args.push('--sleep-subtitles', '3')
+  }
   // without this, a subtitle-only failure (e.g. the 429 above) aborts the whole run before
   // yt-dlp even attempts the actual video/audio — --ignore-errors lets that still happen.
   // Tradeoff: yt-dlp's exit code becomes a weaker success signal, since it now also swallows
